@@ -59,7 +59,6 @@ public class ProductDAO extends DBContext {
     }
 
 
-
     public List<Product> getListProductPaginate(int pageNo, Integer categoryId, Integer status) {
         StringBuilder sql = new StringBuilder("SELECT * FROM Product WHERE 1=1");
         List<Object> params = new ArrayList<>();
@@ -108,6 +107,29 @@ public class ProductDAO extends DBContext {
             return null;
         }
         return products;
+    }
+
+    public boolean addProduct(Product product) {
+        String sql = "INSERT INTO Product (productName, description, price, purchaseCost, status, stock, image, categoryId, createdOn, modifiedOn) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, CURRENT_DATE)";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, product.getProductName());
+            stmt.setString(2, product.getDescription());
+            stmt.setDouble(3, product.getPrice());
+            stmt.setDouble(4, product.getPurchaseCost());
+            stmt.setBoolean(5, product.getStatus() == 1);
+            stmt.setInt(6, product.getStock());
+            stmt.setString(7, product.getImage());
+            stmt.setInt(8, product.getCategoryId());
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

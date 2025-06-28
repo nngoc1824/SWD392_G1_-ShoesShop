@@ -104,7 +104,7 @@
                         </select>
 
                         <input type="search" class="form-control w-5" placeholder="Enter keyword to search...">
-                        <button class="btn btn-primary ms-2">Add</button>
+                        <button class="btn btn-primary ms-2" onclick="window.location.href='add-product'">Add</button>
                     </div>
                     <div class="table-main-content">
                         <table class="table table-hover table-bordered text-center">
@@ -129,7 +129,16 @@
                             <c:forEach var="product" items="${productList}">
                                 <tr>
                                     <td>${product.productId}</td>
-                                    <td>${product.image}</td>
+                                    <td>
+                                        <c:if test="${empty product.image}">
+                                            No image
+                                        </c:if>
+                                        <c:if test="${not empty product.image}">
+                                            <img src="${product.image}"
+                                                 alt="${product.productName}" class="img-fluid"
+                                                 style="width: 100px">
+                                        </c:if>
+                                    </td>
                                     <td>${product.productName}</td>
                                     <td>${product.price}</td>
                                     <td>

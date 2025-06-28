@@ -40,7 +40,7 @@ public class ProductController extends HttpServlet {
                 statusNum = Integer.parseInt(status);
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace(); // Optionally handle error
+            e.printStackTrace();
         }
 
         // Debug
@@ -49,8 +49,11 @@ public class ProductController extends HttpServlet {
         System.out.println("Page: " + pageNum);
 
         List<Product> products = productDAO.getAllProducts(categoryNum, statusNum);
+        if (products == null) {
+            products = List.of();
+        }
         int pageCount = (int) Math.ceil(products.size() / 6.0);
-        if (pageCount == 0) pageCount = 1; // tránh chia 0
+        if (pageCount == 0) pageCount = 1;
         if (pageNum > pageCount) pageNum = 1;
 
         List<Category> categories = categoryDAO.getAllCategories();
