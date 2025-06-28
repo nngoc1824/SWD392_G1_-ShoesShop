@@ -4,6 +4,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Add Product</title>
@@ -43,36 +44,61 @@
 
         .card {
             font-size: 22px;
-            border-radius: 5px;
+            border-radius: 10px;
             background-color: #ffffff !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 10px;
+            padding: 15px;
             border: none;
-        }
-
-        .table-container {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .table-content {
-            width: 100%;
-            height: 88%;
-            padding: 5px;
-        }
-
-        .table-header {
             margin-bottom: 20px;
         }
 
-        .table-header input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        label {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+
+        .image-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .upload-area {
+            border: 2px dashed #92b5e7;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            position: relative;
+            display: block;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-area img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 12px;
+        }
+
+        .note-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .main-content {
+            height: fit-content;
+        }
+
+        .btn-ocean {
+            background-color: #a6cbf8;
         }
     </style>
 </head>
@@ -90,17 +116,108 @@
             <div class="card text-dark">
                 Add Product
             </div>
+            <form action="add-product" method="post" enctype="multipart/form-data">
+                <div class="main-content container-fluid row d-flex mt-3 p-0">
+                    <div class="large-container col-9">
+                        <div class="general card">
+                            <span class="text-large mb-2">General</span>
+                            <div class="form-group">
+                                <label for="productName">Product Name*</label>
+                                <input type="text" class="form-control" id="productName" name="productName"
+                                       placeholder="Enter product name">
+                            </div>
+                            <div class="form-group">
+                                <label for="description">Product Description</label>
+                                <textarea class="form-control" name="description" id="description"></textarea>
+                            </div>
+                        </div>
+                        <div class="price card">
+                            <span class="text-large mb-2">Pricing</span>
+                            <div class="form-group">
+                                <label for="purchaseCost">Product Purchase Cost*</label>
+                                <input type="number" min="0" class="form-control" id="purchaseCost" name="purchaseCost"
+                                       placeholder="Enter product purchase cost">
+                            </div>
+                            <div class="form-group">
+                                <label for="price">Product Price*</label>
+                                <input type="number" min="0" class="form-control" id="price" name="price"
+                                       placeholder="Enter product price">
+                            </div>
+                        </div>
+                        <div class="card stock">
+                            <span class="text-large mb-2">Stock</span>
+                            <label for="category">Stock</label>
+                            <input type="number" min="0" class="form-control" id="stock" name="stock"
+                                   placeholder="Enter product stock">
+                        </div>
+                    </div>
+                    <div class="small-container col-3">
+                        <div class="image-card card">
+                            <span class="text-large mb-2">Image</span>
+                            <label for="productImage" class="upload-area">
+                                <img id="previewImage" src="" alt="Image Preview" style="display: none;">
+                                <input type="file" id="productImage" accept="image/png, image/jpeg, image/jpg" name="image">
+                            </label>
+                            <p class="note-text mt-2">
+                                Set the product image. Only <strong>*.png</strong>, <strong>*.jpg</strong>, and <strong>*.jpeg</strong>
+                                image files are accepted.
+                            </p>
+                        </div>
+                        <div class="card category">
+                            <span class="text-large mb-2">Category</span>
+                            <label for="category">Select Category*</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="" selected disabled>Select a category</option>
+                                <c:forEach var="category" items="${categories}">
+                                    <option value="${category.categoryId}">${category.categoryName}</option>
+                                </c:forEach>
+                            </select>
+                            <div class="form-group mt-3">
+                                <label for="newCategory">Add New Category If Not Existed</label>
+                                <input type="text" class="form-control" id="newCategory"
+                                       placeholder="Enter new category name" name="newCategory">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-container col-12">
+                        <button class="btn btn-ocean" type="submit" id="addProductBtn">Add Product</button>
+                        <button class="btn btn-danger" id="cancelBtn">Cancel</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+
 </div>
-
-
 <script>
     const toggleBtn = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
 
     toggleBtn.addEventListener('click', function () {
         sidebar.classList.toggle('sidebar-collapsed');
+    });
+</script>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+<script>
+    ClassicEditor
+        .create(document.querySelector('#description'))
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+<script>
+    document.getElementById('productImage').addEventListener('change', function (event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('previewImage');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     });
 </script>
 
