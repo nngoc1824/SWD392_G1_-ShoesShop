@@ -17,9 +17,21 @@ public class ProductController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProductDAO productDAO = new ProductDAO();
     private CategoryDAO categoryDAO = new CategoryDAO();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Product> productList = productDAO.getAllProducts();
+        String pageNo = req.getParameter("pageNo");
+        int pageNum = 1;
+        if (pageNo != null) {
+            pageNum = Integer.parseInt(pageNo);
+        }
+        System.out.println(pageNum);
+        List<Product> products = productDAO.getAllProducts();
+        int pageCount = (int) Math.ceil(products.size() * 1.0 / 6);
+
+        List<Product> productList = productDAO.getListProductPaginate(pageNum);
+        req.setAttribute("currentPage",pageNum);
+        req.setAttribute("pageCount", pageCount);
         req.setAttribute("productList", productList);
         req.getRequestDispatcher("/manager_pages/product_list.jsp").forward(req, resp);
     }

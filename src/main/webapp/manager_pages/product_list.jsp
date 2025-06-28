@@ -141,10 +141,11 @@
                             </tbody>
                         </table>
                         <ul class="pagination">
-                            <li class="page-item"><a class="page-link">Previous</a> </li>
-                            <li class="page-item"><a class="page-link active">1</a> </li>
-                            <li class="page-item"><a class="page-link">2</a> </li>
-                            <li class="page-item"><a class="page-link">Next</a> </li>
+                            <li class="page-item  ${currentPage == 1 ? "disabled" : ""}"><a href="product?pageNo=${currentPage - 1}" class="page-link">Previous</a> </li>
+                                <c:forEach var="page" begin="1" end="${pageCount}">
+                                    <li class="page-item  ${currentPage == page ? "active" : ""}"><a a href="product?pageNo=${page}" class="page-link">${page}</a> </li>
+                                </c:forEach>
+                            <li class="page-item  ${currentPage == pageCount ? "disabled" : ""}"><a href="product?pageNo=${currentPage + 1}" class="page-link">Next</a> </li>
                         </ul>
                     </div>
                 </div>
