@@ -1,6 +1,3 @@
-<%@ page import="entites.Product" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.google.gson.Gson" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -94,15 +91,16 @@
                 <div class="table-content ">
                     <div class="table-header d-flex">
                         <select name="category" class="form-select w-25 me-2">
-                            <option value="">All Categories</option>
-                            <option value="electronics">Electronics</option>
-                            <option value="clothing">Clothing</option>
-                            <option value="home">Home</option>
+                            <option value="0">All Categories</option>
+                            <c:forEach var="category" items="${categories}">
+                                <option ${categoryCrr == category.categoryId ? "selected" : ""}
+                                        value="${category.categoryId}">${category.categoryName}</option>
+                            </c:forEach>
                         </select>
                         <select name="status" class="form-select w-25 me-2">
                             <option value="">All Status</option>
-                            <option value="true">In stock</option>
-                            <option value="false">Out of stock</option>
+                            <option value="1" ${statusCrr ==  1 ? "selected" : ''}>In stock</option>
+                            <option value="0" ${statusCrr ==  0 ? "selected" : ''}>Out of stock</option>
                         </select>
 
                         <input type="search" class="form-control w-5" placeholder="Enter keyword to search...">
@@ -123,29 +121,49 @@
                             </tr>
                             </thead>
                             <tbody>
+                            <c:if test="${empty productList}">
+                                <tr>
+                                    <td colspan="8" class="text-center">No products found</td>
+                                </tr>
+                            </c:if>
                             <c:forEach var="product" items="${productList}">
                                 <tr>
                                     <td>${product.productId}</td>
                                     <td>${product.image}</td>
                                     <td>${product.productName}</td>
                                     <td>${product.price}</td>
-                                    <td>${product.categoryId}</td>
+                                    <td>
+                                        <c:forEach var="category" items="${categories}">
+                                            <c:if test="${category.categoryId == product.categoryId}">
+                                                ${category.categoryName}
+                                            </c:if>
+                                        </c:forEach>
+                                    </td>
+
                                     <td>${product.stock}</td>
                                         ${product.status == 1 ? '<td class= "text-success">In stock</td>' : '<td class="text-danger">Out of stock</td>'}
                                     <td>
                                         <a href="editProduct?id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
-                                        <a href="deleteProduct?id=${product.productId}" class="btn btn-danger btn-sm ms-3">Delete</a>
+                                        <a href="deleteProduct?id=${product.productId}"
+                                           class="btn btn-danger btn-sm ms-3">Delete</a>
                                     </td>
                                 </tr>
                             </c:forEach>
                             </tbody>
                         </table>
                         <ul class="pagination">
-                            <li class="page-item  ${currentPage == 1 ? "disabled" : ""}"><a href="product?pageNo=${currentPage - 1}" class="page-link">Previous</a> </li>
-                                <c:forEach var="page" begin="1" end="${pageCount}">
-                                    <li class="page-item  ${currentPage == page ? "active" : ""}"><a a href="product?pageNo=${page}" class="page-link">${page}</a> </li>
-                                </c:forEach>
-                            <li class="page-item  ${currentPage == pageCount ? "disabled" : ""}"><a href="product?pageNo=${currentPage + 1}" class="page-link">Next</a> </li>
+                            <li class="page-item  ${currentPage == 1 ? "disabled" : ""}"><a
+                                    href="product?pageNo=${currentPage - 1}&category=${categoryCrr}&status=${statusCrr}"
+                                    class="page-link">Previous</a></li>
+                            <c:forEach var="page" begin="1" end="${pageCount}">
+                                <li class="page-item  ${currentPage == page ? "active" : ""}"><a a
+                                                                                                 href="product?pageNo=${page}&category=${categoryCrr}&status=${statusCrr}"
+                                                                                                 class="page-link">${page}</a>
+                                </li>
+                            </c:forEach>
+                            <li class="page-item  ${currentPage == pageCount ? "disabled" : ""}"><a
+                                    href="product?pageNo=${currentPage + 1}&category=${categoryCrr}&status=${statusCrr}"
+                                    class="page-link">Next</a></li>
                         </ul>
                     </div>
                 </div>
@@ -154,7 +172,23 @@
     </div>
 </div>
 
+<script>
+    const filterCategory = document.querySelector("select[name='category']")
+    console.log(filterCategory)
+    filterCategory.addEventListener("change", (e) => {
+        let category = filterCategory.value
+        console.log(category)
 
+        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&category=" + category + "&status=${statusCrr}";
+    })
+    const filterStatus = document.querySelector("select[name='status']")
+    filterStatus.addEventListener("change", (e) => {
+        let status = filterStatus.value
+        console.log(status)
+        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&status=" + status + "&category=${categoryCrr}";
+    })
+
+</script>
 <script>
     const toggleBtn = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
