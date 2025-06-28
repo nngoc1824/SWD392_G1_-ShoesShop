@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
-    private int categoryId;
-    private String categoryName;
+public class CartItem {
+    private int cartItemId;
+    private int cartId;
+    private int productId;
+    private int quantity;
+    private double price;
 }

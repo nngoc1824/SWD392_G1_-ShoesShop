@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
-    private int categoryId;
-    private String categoryName;
+public class Address {
+    private Integer addressId;
+    private Integer province;
+    private Integer district;
+    private Integer ward;
 }
+

@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category {
-    private int categoryId;
-    private String categoryName;
+public class Role {
+    private Integer roleId;
+    private String roleName;
 }
+

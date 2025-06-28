@@ -1,14 +1,15 @@
 package entites;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
+import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Product {
     private int productId;
     private String productName;
@@ -16,8 +17,8 @@ public class Product {
     private double price;
     private double purchaseCost;
     private int stock;
-    private boolean status;
-    private LocalDate createdOn;
-    private LocalDate modifiedOn;
-    private Category category;
+    private int status;
+    private Date createdOn;
+    private Date modifiedOn;
+    private int categoryId;
 }
