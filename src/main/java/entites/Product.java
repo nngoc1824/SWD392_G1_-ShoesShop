@@ -18,6 +18,7 @@ public class Product {
     private double purchaseCost;
     private int stock;
     private int status;
+    private String image;
     private Date createdOn;
     private Date modifiedOn;
     private int categoryId;
