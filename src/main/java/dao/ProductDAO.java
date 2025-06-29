@@ -190,7 +190,28 @@ public class ProductDAO extends DBContext {
             return false;
         }
     }
-
+    public boolean disableProduct(int productId) {
+        String sql = "UPDATE Product SET status = 0 WHERE productId = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean enableProduct(int productId) {
+        String sql = "UPDATE Product SET status = 1 WHERE productId = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, productId);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO();
         System.out.println(dao.getProductById(7));
