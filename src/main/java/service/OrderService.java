@@ -17,7 +17,11 @@ public class OrderService {
         this.orderRepository = orderRepository;
     }
 
-    public boolean updateOrderStatus(Long orderCode, PaymentStatus newStatus) {
+    public Order findByOrderId(Integer orderCode) {
+        return orderRepository.findByOrderId(orderCode);
+    }
+
+    public boolean updateOrderStatus(long orderCode, PaymentStatus newStatus) {
         Optional<Order> optionalOrder = orderRepository.findByOrderCode(orderCode);
         if (optionalOrder.isPresent()) {
             Order order = optionalOrder.get();

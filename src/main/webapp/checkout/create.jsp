@@ -1,40 +1,30 @@
-<!DOCTYPE html>
-<html lang="vi">
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tạo Link thanh toán</title>
-  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="main-box">
-  <div class="checkout">
-    <div class="product">
-      <form action="/create-payment-link" method="post">
-        <p><strong>Tên sản phẩm:</strong> Mì tôm Hảo Hảo ly</p>
+<h2>Thông tin đơn hàng</h2>
+<form action="/create-payment-link" method="post">
 
-        <!-- Tổng tiền -->
-        <p><strong>Giá tiền:</strong>
-          <input type="number" name="totalPrice" value="1000" readonly> VNĐ
-        </p>
+  <!-- Ẩn ID -->
+  <input type="hidden" name="orderId" value="${order.orderId}" />
 
-        <!-- Số lượng -->
-        <p><strong>Số lượng:</strong>
-          <input type="number" name="quantity" value="1" readonly>
-        </p>
+  <p><strong>Tổng tiền:</strong>
+    <input type="number" name="totalPrice" value="${order.totalPrice}" readonly />
+  </p>
 
-        <!-- Địa chỉ giao hàng -->
-        <p><strong>Địa chỉ giao hàng:</strong>
-          <input type="text" name="shipAddress" value="123 Đường ABC, Hà Nội" required>
-        </p>
+  <p><strong>Địa chỉ giao hàng:</strong>
+    <input type="text" name="shipAddress" value="${order.shipAddress}" />
+  </p>
 
-        <!-- Trạng thái thanh toán -->
-        <input type="hidden" name="paymentStatus" value="PENDING">
+  <p><strong>Trạng thái thanh toán:</strong>
+    <input type="text" name="paymentStatus" value="${order.paymentStatus}" readonly />
+  </p>
 
-        <button type="submit" id="create-payment-link-btn">Tạo Link thanh toán</button>
-      </form>
-    </div>
-  </div>
-</div>
+  <button type="submit">Tạo Link thanh toán</button>
+</form>
 </body>
 </html>

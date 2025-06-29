@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.RequestParam;
+import service.OrderService;
 import vn.payos.PayOS;
 import vn.payos.type.CheckoutResponseData;
 import vn.payos.type.ItemData;
@@ -18,6 +20,7 @@ import vn.payos.type.PaymentData;
 
 @Controller
 public class CheckoutController {
+    OrderService orderService;
     private final PayOS payOS;
 
     public CheckoutController(PayOS payOS) {
@@ -26,8 +29,10 @@ public class CheckoutController {
     }
 
     @RequestMapping(value = "/create")
-    public String Index() {
-        return "create";
+    public String Index(@RequestParam("id") Integer id, HttpServletRequest request) {
+        Order order = orderService.findByOrderId(id); // Lấy từ DB
+        request.setAttribute("order", order);    // Gửi sang JSP
+        return "create";                         // Tên file create.jsp
     }
 
     @RequestMapping(value = "/success")
