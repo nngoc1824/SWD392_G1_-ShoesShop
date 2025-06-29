@@ -82,7 +82,6 @@
 
     <div class="links">
         <div>
-            <a href="forgot_password.jsp">Quên mật khẩu?</a> |
             <a href="register.jsp">Đăng ký người dùng</a>
         </div>
         <div style="margin-top: 10px;">
