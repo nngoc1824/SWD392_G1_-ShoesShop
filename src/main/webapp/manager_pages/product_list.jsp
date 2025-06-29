@@ -152,8 +152,8 @@
                                     <td>${product.stock}</td>
                                         ${product.status == 1 ? '<td class= "text-success">In stock</td>' : '<td class="text-danger">Out of stock</td>'}
                                     <td>
-                                        <a href="editProduct?id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
-                                        <a href="deleteProduct?id=${product.productId}"
+                                        <a href="update-product?id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
+                                        <a href="delete-product?id=${product.productId}"
                                            class="btn btn-danger btn-sm ms-3">Delete</a>
                                     </td>
                                 </tr>
