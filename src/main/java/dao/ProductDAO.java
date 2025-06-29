@@ -214,20 +214,9 @@ public class ProductDAO extends DBContext {
     }
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO();
-
-// Lấy tất cả
-        dao.getAllProducts(0, -1).forEach(product -> System.out.println(product.getProductName()));
-
-// Lọc theo categoryId = 3
-        dao.getAllProducts(3, -1);
-
-// Lọc theo status = 0 (ẩn)
-        dao.getAllProducts(0, 0);
-
-// Lọc theo cả hai
-        dao.getAllProducts(2, 1);
-
+        System.out.println(dao.getProductById(7));
     }
+
 
 
 }
