@@ -1,13 +1,10 @@
-<%@ page import="entites.Product" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.google.gson.Gson" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Product</title>
+    <title>Update Product</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/common/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/common/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/product_list.css">
@@ -121,6 +118,24 @@
         .overlay-spinner {
             text-align: center;
         }
+        .tagify__dropdown__item {
+            font-size: 15px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .tagify__dropdown__item:hover {
+            background-color: #f0f8ff;
+            cursor: pointer;
+        }
+
+        .tagify__tag {
+            background-color: #dbeeff;
+            color: #003366;
+            font-weight: bold;
+            border-radius: 5px;
+        }
 
     </style>
 </head>
@@ -143,7 +158,9 @@
             <div class="card text-dark">
                 Add Product
             </div>
-            <form action="add-product" method="post" enctype="multipart/form-data">
+            <form action="update-product" method="post" enctype="multipart/form-data">
+                <c:set var="p" value="${product}"/>
+                <input type="hidden" name="productId" value="${p.productId}">
                 <div class="main-content container-fluid row d-flex mt-3 p-0">
                     <div class="large-container col-9">
                         <div class="general card">
@@ -151,11 +168,12 @@
                             <div class="form-group">
                                 <label for="productName">Product Name*</label>
                                 <input type="text" class="form-control" id="productName" name="productName"
-                                       required placeholder="Enter product name">
+                                       value="${p.productName}" required placeholder="Enter product name">
                             </div>
                             <div class="form-group">
                                 <label for="description">Product Description</label>
-                                <textarea class="form-control" name="description" id="description"></textarea>
+                                <textarea class="form-control" name="description"
+                                          id="description">${p.description}</textarea>
                             </div>
                         </div>
                         <div class="price card">
@@ -163,26 +181,31 @@
                             <div class="form-group">
                                 <label for="purchaseCost">Product Purchase Cost*</label>
                                 <input type="number" min="0" class="form-control" id="purchaseCost" name="purchaseCost"
-                                       required placeholder="Enter product purchase cost">
+                                       required placeholder="Enter product purchase cost" value="${p.purchaseCost}">
                             </div>
                             <div class="form-group">
                                 <label for="price">Product Price*</label>
                                 <input required type="number" min="0" class="form-control" id="price" name="price"
-                                       placeholder="Enter product price">
+                                       placeholder="Enter product price" value="${p.price}">
                             </div>
                         </div>
                         <div class="card stock">
                             <span class="text-large mb-2">Stock</span>
                             <label for="category">Stock</label>
                             <input required type="number" min="0" class="form-control" id="stock" name="stock"
-                                   placeholder="Enter product stock">
+                                   placeholder="Enter product stock" value="${p.stock}">
                         </div>
+                        <div class="card form-group mt-3">
+                            <label class="text-large mb-2" for="sizes">Size</label>
+                            <input name="sizes" id="sizes" class="form-control" placeholder="Nhập size và enter">
+                        </div>
+
                     </div>
                     <div class="small-container col-3">
                         <div class="image-card card">
                             <span class="text-large mb-2">Image</span>
                             <label for="productImage" class="upload-area">
-                                <img id="previewImage" src="" alt="Image Preview" style="display: none;">
+                                <img id="previewImage" src="${p.image}" alt="Image Preview" style="display: none;">
                                 <input type="file" id="productImage" accept="image/png, image/jpeg, image/jpg"
                                        name="image">
                             </label>
@@ -194,10 +217,11 @@
                         <div class="card category">
                             <span class="text-large mb-2">Category</span>
                             <label for="category">Select Category*</label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="" selected disabled>Select a category</option>
+                            <select required class="form-select" id="category" name="category">
+                                <option value="" selected>Select a category</option>
                                 <c:forEach var="category" items="${categories}">
-                                    <option value="${category.categoryId}">${category.categoryName}</option>
+                                    <option ${p.categoryId == category.categoryId ? "selected" : ""}
+                                            value="${category.categoryId}">${category.categoryName}</option>
                                 </c:forEach>
                             </select>
                             <div class="form-group mt-3">
@@ -206,13 +230,17 @@
                                        placeholder="Enter new category name" name="newCategory">
                             </div>
                         </div>
-                        <div class="card form-group mt-3">
-                            <label class="text-large mb-2" for="sizes">Size</label>
-                            <input name="sizes" id="sizes" class="form-control" placeholder="Nhập size và enter">
+                        <div class="card status">
+                            <span class="text-large mb-2">Status</span>
+                            <label for="status">Select Status*</label>
+                            <select required class="form-select" id="status" name="status">
+                                <option value="1" ${p.status == 1 ? "selected" : ""}>In stock</option>
+                                <option value="0" ${p.status == 0 ? "selected" : ""}>Out of stock</option>
+                            </select>
                         </div>
                     </div>
                     <div class="button-container col-12">
-                        <button class="btn btn-ocean" type="submit" id="addProductBtn">Add Product</button>
+                        <button class="btn btn-ocean" type="submit" id="addProductBtn">Save Product</button>
                         <button class="btn btn-danger" id="cancelBtn">Cancel</button>
                     </div>
                 </div>
@@ -229,32 +257,6 @@
         <div class="mt-2 text-light">Processing...</div>
     </div>
 </div>
-<script>
-    const form = document.querySelector('form');
-    const loadingOverlay = document.getElementById('fullscreenLoading');
-    const addBtn = document.getElementById('addProductBtn');
-
-    form.addEventListener('submit', function (e) {
-        const selectedCategory = document.getElementById('category').value;
-        const newCategory = document.getElementById('newCategory').value.trim();
-
-        if ((selectedCategory === "" || selectedCategory === null) && newCategory === "") {
-            e.preventDefault(); // Chặn submit
-            alert("Bạn phải chọn một danh mục có sẵn hoặc nhập danh mục mới.");
-            return;
-        }
-
-        // Cho phép submit nếu hợp lệ
-        loadingOverlay.style.display = 'flex';
-        addBtn.disabled = true;
-        addBtn.textContent = 'Saving...';
-    });
-
-    document.getElementById('cancelBtn').addEventListener('click', function (e) {
-        e.preventDefault();
-        window.location.href = 'product';
-    });
-</script>
 
 <script>
     const toggleBtn = document.getElementById('sidebarToggle');
@@ -273,6 +275,12 @@
         });
 </script>
 <script>
+    const previewImage = document.getElementById('previewImage');
+    if (previewImage.src) {
+        previewImage.style.display = 'block';
+    } else {
+        previewImage.style.display = 'none';
+    }
     document.getElementById('productImage').addEventListener('change', function (event) {
         const file = event.target.files[0];
         const preview = document.getElementById('previewImage');
@@ -304,15 +312,21 @@
     });
 </script>
 <script>
+    document.getElementById('newCategory').addEventListener('input', function () {
+        const categorySelect = document.getElementById('category');
+        categorySelect.value = '';
+    });
+</script>
+<script>
     const sizeWhitelist = [
         <c:forEach var="size" items="${sizes}" varStatus="loop">
-        {value: "${size.sizeNumber}", code: "${size.sizeId}"}<c:if test="${!loop.last}">, </c:if>
+        { value: "${size.sizeNumber}", code: "${size.sizeId}" }<c:if test="${!loop.last}">,</c:if>
         </c:forEach>
     ];
 
     const selectedSizes = [
         <c:forEach var="s" items="${selectedSizes}" varStatus="loop">
-        {value: "${s.sizeNumber}", code: "${s.sizeId}"}<c:if test="${!loop.last}">, </c:if>
+        { value: "${s.sizeNumber}", code: "${s.sizeId}" }<c:if test="${!loop.last}">,</c:if>
         </c:forEach>
     ];
 
@@ -356,6 +370,8 @@
         console.log("Add detail:", e.detail);
     });
 </script>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"

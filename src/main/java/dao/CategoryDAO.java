@@ -3,10 +3,7 @@ package dao;
 import entites.Category;
 import utils.DBContext;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +32,26 @@ public class CategoryDAO extends DBContext {
         }
         return categories;
     }
+    public int addCategory(String categoryName) {
+        String sql = "INSERT INTO Category (categoryName) VALUES (?)";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            stmt.setString(1, categoryName);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1); // Trả về categoryId vừa insert
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return -1; // Thất bại
+    }
+
     public static void main(String[] args) {
         CategoryDAO categoryDAO = new CategoryDAO();
         List<Category> categories = categoryDAO.getAllCategories();
