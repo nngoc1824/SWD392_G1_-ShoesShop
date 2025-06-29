@@ -100,6 +100,20 @@
   <div class="info"><strong>Tên đăng nhập:</strong> <%= user.getUserName() %></div>
 
   <!-- ✅ Các nút chức năng -->
+  <div style="margin-top: 20px; text-align: center;">
+    <a href="view-profile.jsp"
+       style="display: inline-block;
+              background-color: #4285f4;
+              color: white;
+              padding: 10px 20px;
+              border-radius: 6px;
+              text-decoration: none;
+              font-weight: bold;
+              transition: background-color 0.3s ease;">
+      👤 Xem hồ sơ
+    </a>
+  </div>
+
   <div class="buttons">
     <a href="profile.jsp">Chỉnh sửa hồ sơ</a>
     <a href="user?action=logout" class="logout">Đăng xuất</a>

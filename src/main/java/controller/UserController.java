@@ -54,6 +54,11 @@ public class UserController extends HttpServlet {
                 case "updateProfile":
                     handleUpdateProfile(request, response, userDAO);
                     break;
+                case "changePassword":
+                    handleChangePassword(request, response, userDAO);
+                    break;
+
+
 
 
                 default:
@@ -137,6 +142,47 @@ public class UserController extends HttpServlet {
         }
         response.sendRedirect("login.jsp");
     }
+
+    private void handleChangePassword(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+        User sessionUser = (User) session.getAttribute("user");
+
+        if (sessionUser == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String currentPassword = request.getParameter("currentPassword");
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
+
+        if (!sessionUser.getPassword().equals(currentPassword)) {
+            request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
+            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            request.setAttribute("error", "Mật khẩu xác nhận không khớp.");
+            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            return;
+        }
+
+        boolean updated = userDAO.updateUserPassword(sessionUser.getUserId(), newPassword);
+        if (updated) {
+            sessionUser.setPassword(newPassword); // Cập nhật lại password trong session
+            request.setAttribute("success", "Đổi mật khẩu thành công.");
+        } else {
+            request.setAttribute("error", "Lỗi khi đổi mật khẩu.");
+        }
+
+        request.getRequestDispatcher("change-password.jsp").forward(request, response);
+    }
+
+
+
 
     private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
             throws ServletException, IOException {

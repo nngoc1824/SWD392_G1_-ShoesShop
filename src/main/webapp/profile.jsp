@@ -113,16 +113,7 @@
 
     <hr style="margin: 30px 0;">
 
-    <h3>Đổi mật khẩu</h3>
 
-    <label for="currentPassword">Mật khẩu hiện tại</label>
-    <input type="password" name="currentPassword" id="currentPassword" />
-
-    <label for="newPassword">Mật khẩu mới</label>
-    <input type="password" name="newPassword" id="newPassword" />
-
-    <label for="confirmPassword">Xác nhận mật khẩu mới</label>
-    <input type="password" name="confirmPassword" id="confirmPassword" />
 
     <input type="submit" value="Cập nhật" />
   </form>
