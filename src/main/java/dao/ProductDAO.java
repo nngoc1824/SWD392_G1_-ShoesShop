@@ -6,6 +6,7 @@ import utils.DBContext;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,11 +110,12 @@ public class ProductDAO extends DBContext {
         return products;
     }
 
-    public boolean addProduct(Product product) {
+    public int addProduct(Product product) {
         String sql = "INSERT INTO Product (productName, description, price, purchaseCost, status, stock, image, categoryId, createdOn, modifiedOn) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_DATE, CURRENT_DATE)";
+
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, product.getProductName());
             stmt.setString(2, product.getDescription());
@@ -124,14 +126,70 @@ public class ProductDAO extends DBContext {
             stmt.setString(7, product.getImage());
             stmt.setInt(8, product.getCategoryId());
 
-            return stmt.executeUpdate() > 0;
+            int rows = stmt.executeUpdate();
+
+            if (rows > 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1); // Trả về productId vừa tạo
+                }
+            }
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return -1; // Trả về -1 nếu có lỗi
+    }
+
+
+    public Product getProductById(int productId) {
+        String sql = "SELECT * FROM Product WHERE productId = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, productId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return new Product().builder()
+                        .productId(rs.getInt("productId"))
+                        .productName(rs.getString("productName"))
+                        .description(rs.getString("description"))
+                        .price(rs.getDouble("price"))
+                        .purchaseCost(rs.getDouble("purchaseCost"))
+                        .status(rs.getBoolean("status") ? 1 : 0)
+                        .stock(rs.getInt("stock"))
+                        .image(rs.getString("image"))
+                        .categoryId(rs.getInt("categoryId"))
+                        .createdOn(rs.getTimestamp("createdOn"))
+                        .modifiedOn(rs.getTimestamp("modifiedOn"))
+                        .build();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateProductDetail(Product product) {
+        String sql = "UPDATE Product SET productName = ?, description = ?, price = ?, purchaseCost = ?, status = ?, stock = ?, image = ?, categoryId = ? WHERE productId = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, product.getProductName());
+            stmt.setString(2, product.getDescription());
+            stmt.setDouble(3, product.getPrice());
+            stmt.setDouble(4, product.getPurchaseCost());
+            stmt.setBoolean(5, product.getStatus() == 1);
+            stmt.setInt(6, product.getStock());
+            stmt.setString(7, product.getImage());
+            stmt.setInt(8, product.getCategoryId());
+            stmt.setInt(9, product.getProductId());
+            return stmt.executeUpdate() > 0;
+
+        }catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
-
 
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO();
@@ -149,5 +207,6 @@ public class ProductDAO extends DBContext {
         dao.getAllProducts(2, 1);
 
     }
+
 
 }
