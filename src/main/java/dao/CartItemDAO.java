@@ -11,6 +11,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CartItemDAO extends DBContext {
+    // Lấy 1 cart item theo cartItemId
+    public CartItem getCartItem(int cartItemId) {
+        String sql = "SELECT * FROM CartItem WHERE cartItemId = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, cartItemId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return CartItem.builder()
+                        .cartItemId(rs.getInt("cartItemId"))
+                        .cartId(rs.getInt("cartId"))
+                        .productId(rs.getInt("productId"))
+                        .quantity(rs.getInt("quantity"))
+                        .price(rs.getDouble("price"))
+                        .build();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     // Lấy tất cả cart item theo cartId
     public List<CartItem> getCartItemsByCartId(int cartId) {
@@ -116,4 +140,47 @@ public class CartItemDAO extends DBContext {
         }
         return false;
     }
+
+        public static void main(String[] args) {
+            CartItemDAO dao = new CartItemDAO();
+
+            // 1. Thêm cart item
+            CartItem item = CartItem.builder()
+                    .cartId(2)
+                    .productId(7)
+                    .quantity(2)
+                    .price(150.0)
+                    .build();
+
+            boolean inserted = dao.insertCartItem(item);
+            System.out.println("Insert success? " + inserted);
+
+            // 2. Lấy danh sách cart item theo cartId
+            List<CartItem> itemList = dao.getCartItemsByCartId(1);
+            System.out.println("Cart items for cartId = 1:");
+            for (CartItem i : itemList) {
+                System.out.println(i);
+            }
+
+            // 3. Cập nhật item đầu tiên (nếu có)
+            if (!itemList.isEmpty()) {
+                CartItem toUpdate = itemList.get(0);
+                toUpdate.setQuantity(toUpdate.getQuantity() + 1);
+                toUpdate.setPrice(toUpdate.getPrice() + 10.0);
+                boolean updated = dao.updateCartItem(toUpdate);
+                System.out.println("Update success? " + updated);
+            }
+
+            // 4. Xoá cart item theo ID (nếu có)
+            if (!itemList.isEmpty()) {
+                int cartItemId = itemList.get(0).getCartItemId();
+                boolean deleted = dao.deleteCartItem(cartItemId);
+                System.out.println("Delete item id " + cartItemId + " success? " + deleted);
+            }
+
+            // 5. Xoá tất cả theo cartId
+            boolean allDeleted = dao.deleteCartItemsByCartId(1);
+            System.out.println("Delete all items for cartId = 1? " + allDeleted);
+        }
+
 }

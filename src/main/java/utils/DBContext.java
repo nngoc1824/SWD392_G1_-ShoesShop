@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public class DBContext {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC";
+        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String user = "root";
-        String password = "123";
+        String password = "ngoc";
 
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(url, user, password);
