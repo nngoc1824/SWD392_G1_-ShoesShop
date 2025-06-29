@@ -32,4 +32,13 @@ public class ProductService {
         // This method should interact with the ProductDAO to update an existing product
         return productDAO.updateProductDetail(product);
     }
+    public boolean disableProduct(int productId) {
+        // This method should interact with the ProductDAO to delete a product
+        return productDAO.disableProduct(productId);
+    }
+
+    public boolean enableProduct(int productId) {
+        // This method should interact with the ProductDAO to enable a product
+        return productDAO.enableProduct(productId);
+    }
 }
