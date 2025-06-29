@@ -11,6 +11,7 @@
     <title>Title</title>
 </head>
 <body>
-    <h2>hello</h2>
+<% response.sendRedirect("home"); %>
+
 </body>
 </html>
