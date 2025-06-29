@@ -14,6 +14,17 @@
             }
         }
     </script>
+    <style>
+        .google-login {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .google-login img {
+            width: 230px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 
@@ -43,6 +54,19 @@
             <input type="submit" value="Đăng nhập" />
         </div>
     </form>
+
+    <!-- ✅ Đăng nhập bằng Google -->
+
+    <div class="google-login" style="text-align: center; margin-top: 20px;">
+        <a href="https://accounts.google.com/o/oauth2/v2/auth?scope=openid%20email%20profile&redirect_uri=http://localhost:8080/SWD392_ShoesShop_war_exploded/login-google&response_type=code&client_id=841040454506-pttbflftv7fu6qsdqpn7ju434hpag7be.apps.googleusercontent.com&access_type=offline&prompt=consent"
+           class="btn btn-lg btn-danger"
+           style="text-decoration: none; padding: 10px 20px;">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google"
+                 style="width: 20px; vertical-align: middle; margin-right: 8px;" />
+            Đăng nhập bằng Google
+        </a>
+    </div>
+
 
     <!-- Hiển thị lỗi -->
     <%

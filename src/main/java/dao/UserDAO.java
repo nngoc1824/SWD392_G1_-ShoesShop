@@ -3,9 +3,13 @@ package dao;
 import entites.User;
 import utils.DBContext;
 import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UserDAO {
-    private Connection conn;
+    private static Connection conn;
 
     public UserDAO(Connection conn) {
         this.conn = conn;
@@ -71,12 +75,13 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE User SET fullName = ?, email = ?, phone = ? WHERE userId = ?";
+        String sql = "UPDATE User SET fullName = ?, email = ?, phone = ?, image =? WHERE userId = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
-            ps.setInt(4, user.getUserId());
+            ps.setString(4, user.getImage());
+            ps.setInt(5, user.getUserId());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -85,41 +90,98 @@ public class UserDAO {
         return false;
     }
 
-    public static void main(String[] args) {
-        try {
-            // 1. Kết nối DB
-            DBContext dbContext = new DBContext();
-            Connection conn = dbContext.getConnection();
-            System.out.println("✅ Kết nối thành công");
+    public class SignWithGoogleDAO {
+        private Connection conn;
 
-            // 2. Tạo User giả lập để test
-            User newUser = User.builder()
-                    .userName("testuser")
-                    .password("123456")
-                    .email("test@example.com")
-                    .fullName("Nguyễn Văn A")
-                    .phone("0123456789")
-                    .status(1)
-                    .addressId(1) // đảm bảo addressId = 1 tồn tại
-                    .build();
+        public SignWithGoogleDAO(Connection conn) {
+            this.conn = conn;
+        }
+    }
 
-            // 3. Gọi DAO và thực hiện đăng ký
-            UserDAO userDAO = new UserDAO(conn);
-            boolean result = userDAO.register(newUser);
-
-            // 4. In kết quả
-            if (result) {
-                System.out.println("✅ Đăng ký thành công!");
-            } else {
-                System.out.println("❌ Đăng ký thất bại.");
+        public User getUserByEmail(String email) throws SQLException {
+            String sql = "SELECT * FROM User WHERE email = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return User.builder()
+                            .userId(rs.getInt("userId"))
+                            .userName(rs.getString("userName"))
+                            .email(rs.getString("email"))
+                            .fullName(rs.getString("fullName"))
+                            .image(rs.getString("image"))
+                            .build();
+                }
             }
+            return null;
+        }
 
-            conn.close();
+    public static User findByGoogleId(String googleId) {
+        String sql = "SELECT * FROM User WHERE googleId = ?";
+        try (
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, googleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("userId"));
+                user.setEmail(rs.getString("email"));
+                user.setFullName(rs.getString("fullName"));
+                user.setGoogleId(rs.getString("googleId"));
 
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("❌ Lỗi kết nối hoặc SQL:");
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void insertGoogleUser(User user) {
+        String sql = "INSERT INTO User (email, password, phone, fullName, googleId) " +
+                "VALUES (?, NULL, NULL, NULL, ?, ?)";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getEmail());         // email
+            ps.setString(2, user.getFullName());      // fullName
+            ps.setString(3, user.getGoogleId());      // googleId
+            ps.executeUpdate();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-}
+    public static User findByEmail(String email) {
+        String sql = "SELECT * FROM User WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("userId"));
+                user.setEmail(rs.getString("email"));
+                user.setPassword(rs.getString("password"));
+                user.setPhone(rs.getString("phone"));
+                user.setFullName(rs.getString("fullName"));
+                user.setGoogleId(rs.getString("googleId"));
+                return user;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static void updateGoogleId(User user) {
+        String sql = "UPDATE User SET googleId = ? WHERE userId = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, user.getGoogleId());
+            ps.setInt(2, user.getUserId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    }
+
+

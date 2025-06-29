@@ -2,15 +2,18 @@ package controller;
 
 import dao.UserDAO;
 import entites.User;
+import jakarta.servlet.annotation.MultipartConfig;
+import utils.CloudinaryConfig;
 import utils.DBContext;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import utils.GoogleUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
-
+@MultipartConfig
 @WebServlet(name = "UserController", urlPatterns = {"/user"})
 public class UserController extends HttpServlet {
 
@@ -65,7 +68,8 @@ public class UserController extends HttpServlet {
         } finally {
             try {
                 if (conn != null && !conn.isClosed()) conn.close();
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -138,12 +142,23 @@ public class UserController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User sessionUser = (User) session.getAttribute("user");
-
+        Part imagePart = request.getPart("image");
         if (sessionUser == null) {
             response.sendRedirect("login.jsp");
             return;
         }
+        String imageUrl = "";
 
+        if (imagePart != null && imagePart.getSize() > 0) {
+
+            try {
+                imageUrl = CloudinaryConfig.updloadImage(imagePart);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        System.out.println("Image URL: " + imageUrl);
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
@@ -152,6 +167,7 @@ public class UserController extends HttpServlet {
         sessionUser.setFullName(fullName);
         sessionUser.setEmail(email);
         sessionUser.setPhone(phone);
+        sessionUser.setImage(imageUrl);
 
         boolean updated = userDAO.updateUser(sessionUser);
 
@@ -164,5 +180,8 @@ public class UserController extends HttpServlet {
 
         request.getRequestDispatcher("profile.jsp").forward(request, response);
     }
-
 }
+
+
+
+
