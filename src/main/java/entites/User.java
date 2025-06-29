@@ -20,4 +20,5 @@ public class User {
     private String image;
     private int status;
     private int addressId;
+    private String googleId;
 }
