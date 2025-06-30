@@ -17,6 +17,7 @@ import service.ProductService;
 import service.ProductSizeService;
 import service.SizeService;
 import utils.CloudinaryConfig;
+import utils.ValidateProduct;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,7 +50,12 @@ public class AddProductController extends HttpServlet {
         int priceStr = Integer.parseInt(req.getParameter("price"));
         int categoryIdStr = 0;
         if (req.getParameter("category") != null) {
-            categoryIdStr = Integer.parseInt(req.getParameter("category"));
+            categoryIdStr = ValidateProduct.getIntegerValue(req.getParameter("category"));
+            if(categoryIdStr == -1){
+                req.setAttribute("error", "Invalid category selected.");
+                req.getRequestDispatcher("/manager_pages/add_product.jsp?err=").forward(req, resp);
+                return;
+            }
         }
         int purchaseCost = Integer.parseInt(req.getParameter("purchaseCost"));
         int stock = Integer.parseInt(req.getParameter("stock"));

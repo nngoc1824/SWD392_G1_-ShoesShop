@@ -25,6 +25,7 @@ public class ProductService {
         return productDAO.getListProductPaginate(pageNo, categoryId, status);
     }
     public int addProduct(Product product) {
+
         // This method should interact with the ProductDAO to add a new product
         return productDAO.addProduct(product);
     }
