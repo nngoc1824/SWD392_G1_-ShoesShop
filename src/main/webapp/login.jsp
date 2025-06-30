@@ -69,7 +69,7 @@
 
         <div class="links mt-4">
             <a href="register.jsp">Đăng ký người dùng</a><br>
-            <a href="homepage.jsp">Về trang chủ</a>
+            <a href="home">Về trang chủ</a>
         </div>
     </div>
 </div>

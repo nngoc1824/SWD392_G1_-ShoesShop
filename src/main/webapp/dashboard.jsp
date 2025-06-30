@@ -120,7 +120,7 @@
   </div>
 
   <div class="buttons">
-    <a href="homepage.jsp">Home Page</a>
+    <a href="home">Home Page</a>
   </div>
 </div>
 

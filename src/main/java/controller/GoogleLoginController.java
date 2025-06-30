@@ -48,7 +48,7 @@ public class GoogleLoginController extends HttpServlet {
             HttpSession session = req.getSession();
             session.setAttribute("user", existingUser);
 
-            resp.sendRedirect("dashboard.jsp");
+            resp.sendRedirect("home");
 
         } catch (Exception e) {
             e.printStackTrace();
