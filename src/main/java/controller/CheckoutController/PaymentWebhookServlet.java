@@ -3,7 +3,6 @@ package controller.CheckoutController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import entites.PaymentStatus;
-import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import service.OrderService;
@@ -18,9 +17,13 @@ import java.io.IOException;
 @WebServlet("/payment/payos_transfer_handler")
 public class PaymentWebhookServlet extends HttpServlet {
     private final PayOS payOS = PayOSInitializer.getInstance();
-    private final OrderService orderService = new OrderService(); // giả lập
+    private final OrderService orderService; // giả lập
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    public PaymentWebhookServlet(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
