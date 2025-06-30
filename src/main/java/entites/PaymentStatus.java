@@ -2,9 +2,7 @@ package entites;
 
 public enum PaymentStatus {
     PAID("00"),
-    PENDING("01"),
-    PROCESSING("02"),
-    CANCELLED("03");
+    Fail("01");
 
     private final String code;
 

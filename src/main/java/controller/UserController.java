@@ -87,7 +87,7 @@ public class UserController extends HttpServlet {
         User user = userDAO.login(username, password);
         if (user != null) {
             request.getSession().setAttribute("user", user);
-            response.sendRedirect("homepage.jsp");
+            response.sendRedirect("home");
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
@@ -140,7 +140,7 @@ public class UserController extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("home");
     }
 
     private void handleChangePassword(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
