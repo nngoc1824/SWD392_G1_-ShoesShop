@@ -104,7 +104,7 @@
                         </select>
 
                         <input type="search" class="form-control w-5" placeholder="Enter keyword to search...">
-                        <button class="btn btn-primary ms-2" onclick="window.location.href='add-product'">Add</button>
+                        <button class="btn btn-primary ms-2" onclick="window.location.href='?action=add-product'">Add</button>
                     </div>
                     <div class="table-main-content">
                         <table class="table table-hover table-bordered text-center">
@@ -152,13 +152,13 @@
                                     <td>${product.stock}</td>
                                         ${product.status == 1 ? '<td class= "text-success">In stock</td>' : '<td class="text-danger">Out of stock</td>'}
                                     <td>
-                                        <a href="update-product?id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
+                                        <a href="?action=update-product&id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
                                         <c:if test="${product.status == 1}">
-                                            <a href="disable-product?id=${product.productId}"
+                                            <a href="?action=disable-product&id=${product.productId}"
                                                class="btn btn-danger btn-sm ms-3">Disable</a>
                                         </c:if>
                                         <c:if test="${product.status == 0}">
-                                            <a href="enable-product?id=${product.productId}"
+                                            <a href="?action=enable-product&id=${product.productId}"
                                                class="btn btn-success btn-sm ms-3">Enable</a>
                                         </c:if>
                                     </td>

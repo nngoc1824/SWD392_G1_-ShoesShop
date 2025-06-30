@@ -143,7 +143,7 @@
             <div class="card text-dark">
                 Add Product
             </div>
-            <form action="add-product" method="post" enctype="multipart/form-data">
+            <form action="?action=add-product" method="post" enctype="multipart/form-data">
                 <div class="main-content container-fluid row d-flex mt-3 p-0">
                     <div class="large-container col-9">
                         <div class="general card">

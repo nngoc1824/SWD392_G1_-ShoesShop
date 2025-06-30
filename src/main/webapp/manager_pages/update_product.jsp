@@ -158,7 +158,7 @@
             <div class="card text-dark">
                 Add Product
             </div>
-            <form action="update-product" method="post" enctype="multipart/form-data">
+            <form action="?action=update-product" method="post" enctype="multipart/form-data">
                 <c:set var="p" value="${product}"/>
                 <input type="hidden" name="productId" value="${p.productId}">
                 <div class="main-content container-fluid row d-flex mt-3 p-0">

@@ -96,7 +96,7 @@
             <div class="collapse" id="ecommerceMenu">
                 <ul class="list-unstyled ps-2">
                     <li><a class="sidebar-link text-primary" href="product">Product List</a></li>
-                    <li><a class="sidebar-link" href="add-product">Add Product</a></li>
+                    <li><a class="sidebar-link" href="?action=add-product">Add Product</a></li>
                 </ul>
             </div>
         </li>
