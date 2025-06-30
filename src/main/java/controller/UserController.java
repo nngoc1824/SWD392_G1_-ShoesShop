@@ -87,7 +87,7 @@ public class UserController extends HttpServlet {
         User user = userDAO.login(username, password);
         if (user != null) {
             request.getSession().setAttribute("user", user);
-            response.sendRedirect("dashboard.jsp");
+            response.sendRedirect("homepage.jsp");
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("login.jsp").forward(request, response);

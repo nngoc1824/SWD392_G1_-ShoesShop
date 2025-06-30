@@ -1,5 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page import="entites.User" %>
+<%
+    User user = (User) session.getAttribute("user");
+%>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <link rel="stylesheet" href="css/css/header.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -21,9 +25,17 @@
 
         <!-- Right: Avatar + Cart -->
         <div class="d-flex align-items-center">
-            <a href="profile" class="text-dark mr-3">
+            <% if (session.getAttribute("user") == null) { %>
+            <!-- Nếu chưa đăng nhập: icon người dùng dẫn tới trang login -->
+            <a href="login.jsp" class="text-dark mr-3" title="Đăng nhập">
                 <i class="fas fa-user-circle fa-lg"></i>
             </a>
+            <% } else { %>
+            <!-- Nếu đã đăng nhập: icon người dùng dẫn tới trang hồ sơ -->
+            <a href="dashboard.jsp" class="text-dark mr-3" title="Hồ sơ cá nhân">
+                <i class="fas fa-user-circle fa-lg"></i>
+            </a>
+            <% } %>
             <a href="cart" class="text-dark">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="ml-1">Cart [<c:out value="${cartSize != null ? cartSize : 0}"/>]</span>
