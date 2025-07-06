@@ -78,6 +78,7 @@
 <body>
 
 <div class="container">
+
   <h2>Chào mừng, <%= user.getFullName() %>!</h2>
 
   <!-- ✅ Hiển thị ảnh đại diện nếu có -->

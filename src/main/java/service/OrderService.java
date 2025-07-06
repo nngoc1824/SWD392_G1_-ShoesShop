@@ -11,7 +11,7 @@ import java.util.Optional;
 @Service
 public class OrderService {
 
-    private final OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
     public OrderService() {
         this.orderRepository = orderRepository;
