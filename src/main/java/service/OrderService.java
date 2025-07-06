@@ -13,9 +13,10 @@ public class OrderService {
 
     private OrderRepository orderRepository;
 
-    public OrderService() {
+    public OrderService(OrderRepository orderRepository) {
         this.orderRepository = orderRepository;
     }
+    
 
     public Order findByOrderId(Integer orderCode) {
         return orderRepository.findByOrderId(orderCode);

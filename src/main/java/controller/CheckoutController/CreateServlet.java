@@ -12,7 +12,7 @@ import java.io.IOException;
 
 @WebServlet("/create")
 public class CreateServlet extends HttpServlet {
-    private OrderService orderService = new OrderService();
+    private OrderService orderService;
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Integer id = Integer.parseInt(req.getParameter("id"));
