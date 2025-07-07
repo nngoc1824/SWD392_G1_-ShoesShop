@@ -4,11 +4,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Update Product</title>
+    <title>Add Product</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/common/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/common/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/product_list.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/table_product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/product_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/table_product.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -118,24 +118,6 @@
         .overlay-spinner {
             text-align: center;
         }
-        .tagify__dropdown__item {
-            font-size: 15px;
-            padding: 6px 10px;
-            border-radius: 4px;
-            transition: background 0.2s ease;
-        }
-
-        .tagify__dropdown__item:hover {
-            background-color: #f0f8ff;
-            cursor: pointer;
-        }
-
-        .tagify__tag {
-            background-color: #dbeeff;
-            color: #003366;
-            font-weight: bold;
-            border-radius: 5px;
-        }
 
     </style>
 </head>
@@ -158,9 +140,7 @@
             <div class="card text-dark">
                 Add Product
             </div>
-            <form action="?action=update-product" method="post" enctype="multipart/form-data">
-                <c:set var="p" value="${product}"/>
-                <input type="hidden" name="productId" value="${p.productId}">
+            <form action="?action=add-product" method="post" enctype="multipart/form-data">
                 <div class="main-content container-fluid row d-flex mt-3 p-0">
                     <div class="large-container col-9">
                         <div class="general card">
@@ -168,12 +148,11 @@
                             <div class="form-group">
                                 <label for="productName">Product Name*</label>
                                 <input type="text" class="form-control" id="productName" name="productName"
-                                       value="${p.productName}" required placeholder="Enter product name">
+                                       required placeholder="Enter product name">
                             </div>
                             <div class="form-group">
                                 <label for="description">Product Description</label>
-                                <textarea class="form-control" name="description"
-                                          id="description">${p.description}</textarea>
+                                <textarea class="form-control" name="description" id="description"></textarea>
                             </div>
                         </div>
                         <div class="price card">
@@ -181,31 +160,26 @@
                             <div class="form-group">
                                 <label for="purchaseCost">Product Purchase Cost*</label>
                                 <input type="number" min="0" class="form-control" id="purchaseCost" name="purchaseCost"
-                                       required placeholder="Enter product purchase cost" value="${p.purchaseCost}">
+                                       required placeholder="Enter product purchase cost">
                             </div>
                             <div class="form-group">
                                 <label for="price">Product Price*</label>
                                 <input required type="number" min="0" class="form-control" id="price" name="price"
-                                       placeholder="Enter product price" value="${p.price}">
+                                       placeholder="Enter product price">
                             </div>
                         </div>
                         <div class="card stock">
                             <span class="text-large mb-2">Stock</span>
                             <label for="category">Stock</label>
                             <input required type="number" min="0" class="form-control" id="stock" name="stock"
-                                   placeholder="Enter product stock" value="${p.stock}">
+                                   placeholder="Enter product stock">
                         </div>
-                        <div class="card form-group mt-3">
-                            <label class="text-large mb-2" for="sizes">Size</label>
-                            <input name="sizes" id="sizes" class="form-control" placeholder="Nhập size và enter">
-                        </div>
-
                     </div>
                     <div class="small-container col-3">
                         <div class="image-card card">
                             <span class="text-large mb-2">Image</span>
                             <label for="productImage" class="upload-area">
-                                <img id="previewImage" src="${p.image}" alt="Image Preview" style="display: none;">
+                                <img id="previewImage" src="" alt="Image Preview" style="display: none;">
                                 <input type="file" id="productImage" accept="image/png, image/jpeg, image/jpg"
                                        name="image">
                             </label>
@@ -217,11 +191,10 @@
                         <div class="card category">
                             <span class="text-large mb-2">Category</span>
                             <label for="category">Select Category*</label>
-                            <select required class="form-select" id="category" name="category">
-                                <option value="" selected>Select a category</option>
+                            <select class="form-select" id="category" name="category">
+                                <option value="" selected disabled>Select a category</option>
                                 <c:forEach var="category" items="${categories}">
-                                    <option ${p.categoryId == category.categoryId ? "selected" : ""}
-                                            value="${category.categoryId}">${category.categoryName}</option>
+                                    <option value="${category.settingId}">${category.settingName}</option>
                                 </c:forEach>
                             </select>
                             <div class="form-group mt-3">
@@ -230,17 +203,9 @@
                                        placeholder="Enter new category name" name="newCategory">
                             </div>
                         </div>
-                        <div class="card status">
-                            <span class="text-large mb-2">Status</span>
-                            <label for="status">Select Status*</label>
-                            <select required class="form-select" id="status" name="status">
-                                <option value="1" ${p.status == 1 ? "selected" : ""}>In stock</option>
-                                <option value="0" ${p.status == 0 ? "selected" : ""}>Out of stock</option>
-                            </select>
-                        </div>
                     </div>
                     <div class="button-container col-12">
-                        <button class="btn btn-ocean" type="submit" id="addProductBtn">Save Product</button>
+                        <button class="btn btn-ocean" type="submit" id="addProductBtn">Add Product</button>
                         <button class="btn btn-danger" id="cancelBtn">Cancel</button>
                     </div>
                 </div>
@@ -257,6 +222,32 @@
         <div class="mt-2 text-light">Processing...</div>
     </div>
 </div>
+<script>
+    const form = document.querySelector('form');
+    const loadingOverlay = document.getElementById('fullscreenLoading');
+    const addBtn = document.getElementById('addProductBtn');
+
+    form.addEventListener('submit', function (e) {
+        const selectedCategory = document.getElementById('category').value;
+        const newCategory = document.getElementById('newCategory').value.trim();
+
+        if ((selectedCategory === "" || selectedCategory === null) && newCategory === "") {
+            e.preventDefault(); // Chặn submit
+            alert("Bạn phải chọn một danh mục có sẵn hoặc nhập danh mục mới.");
+            return;
+        }
+
+        // Cho phép submit nếu hợp lệ
+        loadingOverlay.style.display = 'flex';
+        addBtn.disabled = true;
+        addBtn.textContent = 'Saving...';
+    });
+
+    document.getElementById('cancelBtn').addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.href = 'product';
+    });
+</script>
 
 <script>
     const toggleBtn = document.getElementById('sidebarToggle');
@@ -275,12 +266,6 @@
         });
 </script>
 <script>
-    const previewImage = document.getElementById('previewImage');
-    if (previewImage.src) {
-        previewImage.style.display = 'block';
-    } else {
-        previewImage.style.display = 'none';
-    }
     document.getElementById('productImage').addEventListener('change', function (event) {
         const file = event.target.files[0];
         const preview = document.getElementById('previewImage');
@@ -311,67 +296,6 @@
         window.location.href = 'product';
     });
 </script>
-<script>
-    document.getElementById('newCategory').addEventListener('input', function () {
-        const categorySelect = document.getElementById('category');
-        categorySelect.value = '';
-    });
-</script>
-<script>
-    const sizeWhitelist = [
-        <c:forEach var="size" items="${sizes}" varStatus="loop">
-        { value: "${size.sizeNumber}", code: "${size.sizeId}" }<c:if test="${!loop.last}">,</c:if>
-        </c:forEach>
-    ];
-
-    const selectedSizes = [
-        <c:forEach var="s" items="${selectedSizes}" varStatus="loop">
-        { value: "${s.sizeNumber}", code: "${s.sizeId}" }<c:if test="${!loop.last}">,</c:if>
-        </c:forEach>
-    ];
-
-    const sizeInput = document.querySelector('input[name=sizes]');
-
-    var tagify = new Tagify(sizeInput, {
-        delimiters: null,
-        enforceWhitelist: false,
-        whitelist: sizeWhitelist,
-        dropdown: {
-            enabled: 1, // bật dropdown sau khi gõ 1 ký tự
-        },
-        templates: {
-            tag: function (tagData) {
-                return `
-                    <tag title="\${tagData.value}" contenteditable="false" spellcheck="false" class="tagify__tag">
-                        <x title='remove tag' class='tagify__tag__removeBtn'></x>
-                        <div>
-                            <span class='tagify__tag-text'>\${tagData.value}</span>
-                        </div>
-                    </tag>`;
-            },
-            dropdownItem: function (tagData) {
-                return `
-                    <div class='tagify__dropdown__item' tabindex="0" data-value="\${tagData.value}">
-                        \${tagData.value}
-                    </div>`;
-            }
-        }
-    });
-
-    // Thêm các size đã chọn sẵn
-    tagify.addTags(selectedSizes);
-
-    // Debug
-    tagify.on('click', e => console.log('click', e.detail));
-    tagify.on('remove', e => console.log('remove', e.detail));
-    tagify.on('add', e => {
-        console.log("Input DOM:", tagify.DOM.originalInput);
-        console.log("Input value:", tagify.DOM.originalInput.value);
-        console.log("Add detail:", e.detail);
-    });
-</script>
-
-
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"

@@ -1,10 +1,8 @@
 package controller;
 
-import dao.CategoryDAO;
 import dao.ProductDAO;
-import entites.Category;
 import entites.Product;
-import entites.Size;
+import entites.Setting;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,29 +10,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import service.CategoryService;
 import service.ProductService;
-import service.ProductSizeService;
-import service.SizeService;
+import service.SettingService;
 import utils.CloudinaryConfig;
 import utils.ValidateProduct;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
 @MultipartConfig
 @WebServlet(name = "ProductController", urlPatterns = {"/product"})
 public class ProductController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private ProductDAO productDAO = new ProductDAO();
-    private CategoryDAO categoryDAO = new CategoryDAO();
-    private SizeService sizeService = new SizeService();
-    private CategoryService categoryService = new CategoryService();
-    private ProductSizeService pr = new ProductSizeService();
+    private SettingService settingService = new SettingService();
     private ProductService productService = new ProductService();
 
     @Override
@@ -120,7 +109,7 @@ public class ProductController extends HttpServlet {
         if (pageCount == 0) pageCount = 1;
         if (pageNum > pageCount) pageNum = 1;
 
-        List<Category> categories = categoryDAO.getAllCategories();
+        List<Setting> categories = settingService.getAllCategories();
         List<Product> productList = productDAO.getListProductPaginate(pageNum, categoryNum, statusNum);
 
         req.setAttribute("categoryCrr", categoryNum);
@@ -129,13 +118,12 @@ public class ProductController extends HttpServlet {
         req.setAttribute("currentPage", pageNum);
         req.setAttribute("pageCount", pageCount);
         req.setAttribute("productList", productList);
-        req.getRequestDispatcher("/manager_pages/product_list.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/view/manager_pages/product_list.jsp").forward(req, resp);
     }
 
     public void addProducts(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("sizes", sizeService.getAllSizes());
-        req.setAttribute("categories", categoryService.getAllCategories());
-        req.getRequestDispatcher("/manager_pages/add_product.jsp").forward(req, resp);
+        req.setAttribute("categories", settingService.getAllCategories());
+        req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
     }
 
     public void updateProductDetails(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -144,15 +132,13 @@ public class ProductController extends HttpServlet {
             try {
                 int id = Integer.parseInt(productId);
                 // Thêm dòng này
-                req.setAttribute("sizes", sizeService.getAllSizes());
-                req.setAttribute("selectedSizes", pr.getSizesByProductId(id));
-                req.setAttribute("categories", categoryService.getAllCategories());
+                req.setAttribute("categories", settingService.getAllCategories());
                 req.setAttribute("product", productService.getProductById(id));
             } catch (NumberFormatException e) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid product ID format");
                 return;
             }
-            req.getRequestDispatcher("/manager_pages/update_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/view/manager_pages/update_product.jsp").forward(req, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Product ID is required");
         }
@@ -217,8 +203,7 @@ public class ProductController extends HttpServlet {
             // Validate purchase cost
             purchaseCost = ValidateProduct.getIntegerValue(req.getParameter("purchaseCost"));
             if (purchaseCost == -1) {
-                req.setAttribute("error", "Invalid purchase cost format.");
-                req.getRequestDispatcher("/manager_pages/add_product.jsp?err=").forward(req, resp);
+                req.getRequestDispatcher("product?action=add-product&err=Invalid purchase cost").forward(req, resp);
                 return;
             }
         }
@@ -227,8 +212,7 @@ public class ProductController extends HttpServlet {
             // Validate stock
             stock = ValidateProduct.getIntegerValue(req.getParameter("stock"));
             if (stock == -1) {
-                req.setAttribute("error", "Invalid stock format.");
-                req.getRequestDispatcher("/manager_pages/add_product.jsp?err=").forward(req, resp);
+                req.getRequestDispatcher("product?action=add-product&err=Invalid stock").forward(req, resp);
                 return;
             }
         }
@@ -237,7 +221,7 @@ public class ProductController extends HttpServlet {
 
         if (newCategory != null && !newCategory.isEmpty()) {
             // If new category is provided, add it to the database
-            categoryId = categoryService.addCategory(newCategory);
+            categoryId = settingService.addCategory(newCategory);
         }
         String imageUrl = "";
 
@@ -265,51 +249,13 @@ public class ProductController extends HttpServlet {
         int isAdded = productService.addProduct(product);
         System.out.println("Add Product: " + isAdded);
         if (isAdded != -1) {
-            // Nếu thêm sản phẩm thành công, xử lý các size
-            System.out.println("Product added with ID: " + isAdded);
-            String json = req.getParameter("sizes");
-            List<Integer> sizeIds = new ArrayList<>();
-            List<String> newSizes = new ArrayList<>();
-
-            // Tách các size từ JSON
-
-            if (json != null && !json.isEmpty()) {
-                JSONArray arr = new JSONArray(json);
-                for (int i = 0; i < arr.length(); i++) {
-                    JSONObject obj = arr.getJSONObject(i);
-
-                    // Nếu có 'code' thì là size cũ (đã có trong DB)
-                    if (obj.has("code") && !obj.isNull("code")) {
-                        int sizeId = obj.getInt("code");
-                        sizeIds.add(sizeId);
-                    } else {
-                        // Nếu không có thì là size mới
-                        String newSize = obj.getString("value");
-                        newSizes.add(newSize);
-                    }
-                }
-            }
-            // sizeIds và newSizes đã được tách từ Tagify (value = sizeNumber, code = sizeId)
-            List<Integer> allSizeIds = new ArrayList<>(sizeIds);
-            // Thêm size mới vào DB và bổ sung sizeId
-            for (String newSize : newSizes) {
-                int newId = sizeService.insertSize(newSize);
-                allSizeIds.add(newId);
-            }
-            // Thêm cái mới
-            for (int newId : allSizeIds) {
-                if (!pr.exists(isAdded, newId)) {
-                    pr.insert(isAdded, newId);
-                }
-            }
             // Redirect to the product list page with success message
             req.setAttribute("message", "Product added successfully!");
             resp.sendRedirect(req.getContextPath() + "/product");
         } else {
-
             // Forward back to the add product page with error message
             req.setAttribute("error", "Failed to add product. Please try again.");
-            req.getRequestDispatcher("/manager_pages/add_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
         }
     }
 
@@ -325,56 +271,7 @@ public class ProductController extends HttpServlet {
         int categoryIdStr = 0;
         int stock = (int) Double.parseDouble(req.getParameter("stock"));
         int status = Integer.parseInt(req.getParameter("status"));
-        String json = req.getParameter("sizes");
-        List<Integer> sizeIds = new ArrayList<>();
-        List<String> newSizes = new ArrayList<>();
-
-        // Tách các size từ JSON
-
-        if (json != null && !json.isEmpty()) {
-            JSONArray arr = new JSONArray(json);
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-
-                // Nếu có 'code' thì là size cũ (đã có trong DB)
-                if (obj.has("code") && !obj.isNull("code")) {
-                    int sizeId = obj.getInt("code");
-                    sizeIds.add(sizeId);
-                } else {
-                    // Nếu không có thì là size mới
-                    String newSize = obj.getString("value");
-                    newSizes.add(newSize);
-                }
-            }
-        }
-        // sizeIds và newSizes đã được tách từ Tagify (value = sizeNumber, code = sizeId)
-        List<Integer> allSizeIds = new ArrayList<>(sizeIds);
-
-        // Thêm size mới vào DB và bổ sung sizeId
-        for (String newSize : newSizes) {
-            int newId = sizeService.insertSize(newSize);
-            allSizeIds.add(newId);
-        }
-
-        // Đồng bộ với bảng ProductSize
-        List<Size> currentSizeIds = pr.getSizesByProductId(productId);
-        Set<Integer> updatedSizeSet = new HashSet<>(allSizeIds);
-
-        // Xoá cái đã bị gỡ
-        for (Size oldId : currentSizeIds) {
-            if (!updatedSizeSet.contains(oldId.getSizeId())) {
-                pr.delete(productId, oldId.getSizeId());
-            }
-        }
-
-        // Thêm cái mới
-        for (int newId : updatedSizeSet) {
-            if (!pr.exists(productId, newId)) {
-                pr.insert(productId, newId);
-            }
-        }
-
-        if (req.getParameter("category") != null) {
+        if (req.getParameter("category") != null && !req.getParameter("category").isEmpty()) {
             categoryIdStr = Integer.parseInt(req.getParameter("category"));
         }
         // If a new category is provided, add it to the database
@@ -382,7 +279,7 @@ public class ProductController extends HttpServlet {
         int categoryId = 0;
         if (newCategory != null && !newCategory.isEmpty()) {
             // If new category is provided, add it to the database
-            categoryId = categoryService.addCategory(newCategory);
+            categoryId = settingService.addCategory(newCategory);
         }
         //Save image
         String imageUrl = "";
@@ -423,7 +320,7 @@ public class ProductController extends HttpServlet {
         } else {
             // Forward back to the add product page with error message
             req.setAttribute("error", "Failed to update product. Please try again.");
-            req.getRequestDispatcher("/manager_pages/add_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
         }
     }
 }

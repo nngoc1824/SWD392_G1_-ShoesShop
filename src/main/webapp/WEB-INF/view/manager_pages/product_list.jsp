@@ -4,10 +4,10 @@
 <html>
 <head>
     <title>Product List</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/common/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/common/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/product_list.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/table_product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/product_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/table_product.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -93,8 +93,8 @@
                         <select name="category" class="form-select w-25 me-2">
                             <option value="0">All Categories</option>
                             <c:forEach var="category" items="${categories}">
-                                <option ${categoryCrr == category.categoryId ? "selected" : ""}
-                                        value="${category.categoryId}">${category.categoryName}</option>
+                                <option ${categoryCrr == category.settingId ? "selected" : ""}
+                                        value="${category.settingId}">${category.settingName}</option>
                             </c:forEach>
                         </select>
                         <select name="status" class="form-select w-25 me-2">
@@ -143,8 +143,8 @@
                                     <td>${product.price}</td>
                                     <td>
                                         <c:forEach var="category" items="${categories}">
-                                            <c:if test="${category.categoryId == product.categoryId}">
-                                                ${category.categoryName}
+                                            <c:if test="${category.settingId == product.categoryId}">
+                                                ${category.settingName}
                                             </c:if>
                                         </c:forEach>
                                     </td>
