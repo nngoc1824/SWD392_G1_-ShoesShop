@@ -18,4 +18,8 @@ public enum PaymentStatus {
         }
         throw new IllegalArgumentException("Unknown status code: " + code);
     }
+
+    public String getCode() {
+        return code;
+    }
 }
