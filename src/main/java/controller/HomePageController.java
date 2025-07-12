@@ -21,7 +21,7 @@ public class HomePageController extends HttpServlet {
 
 
         ProductService productService = new ProductService();
-        List<Product> products = productService.getAllProducts(0,-1) ;// 0: không lọc theo category, -1: không lọc theo status
+        List<Product> products = productService.getAllProducts(0,-1, "") ;// 0: không lọc theo category, -1: không lọc theo status
 
         // (Tùy chọn) Đếm số sản phẩm trong giỏ hàng từ session
         HttpSession session = request.getSession();

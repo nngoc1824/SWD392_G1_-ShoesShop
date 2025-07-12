@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import service.ProductService;
 import service.SettingService;
 import utils.CloudinaryConfig;
@@ -22,7 +24,7 @@ import java.util.List;
 @WebServlet(name = "ProductController", urlPatterns = {"/product"})
 public class ProductController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private ProductDAO productDAO = new ProductDAO();
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private SettingService settingService = new SettingService();
     private ProductService productService = new ProductService();
 
@@ -77,7 +79,8 @@ public class ProductController extends HttpServlet {
         String pageNo = req.getParameter("pageNo");
         String category = req.getParameter("category");
         String status = req.getParameter("status");
-
+        String search = req.getParameter("search");
+        log.info("Page No: {}, Category: {}, Status: {}, Search: {}", pageNo, category, status, search);
         int pageNum = 1;
         int categoryNum = 0;  // 0 means no filtering
         int statusNum = -1;   // -1 means no filtering
@@ -93,15 +96,11 @@ public class ProductController extends HttpServlet {
                 statusNum = Integer.parseInt(status);
             }
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            log.warn("Invalid number format in request parameters: {}", e.getMessage());
         }
 
-        // Debug
-        System.out.println("Category: " + categoryNum);
-        System.out.println("Status: " + statusNum);
-        System.out.println("Page: " + pageNum);
 
-        List<Product> products = productDAO.getAllProducts(categoryNum, statusNum);
+        List<Product> products = productService.getAllProducts(categoryNum, statusNum, search);
         if (products == null) {
             products = List.of();
         }
@@ -110,13 +109,14 @@ public class ProductController extends HttpServlet {
         if (pageNum > pageCount) pageNum = 1;
 
         List<Setting> categories = settingService.getAllCategories();
-        List<Product> productList = productDAO.getListProductPaginate(pageNum, categoryNum, statusNum);
+        List<Product> productList = productService.getListProductPaginate(pageNum, categoryNum, statusNum, search);
 
         req.setAttribute("categoryCrr", categoryNum);
         req.setAttribute("statusCrr", statusNum);
         req.setAttribute("categories", categories);
         req.setAttribute("currentPage", pageNum);
         req.setAttribute("pageCount", pageCount);
+        req.setAttribute("search", search);
         req.setAttribute("productList", productList);
         req.getRequestDispatcher("/WEB-INF/view/manager_pages/product_list.jsp").forward(req, resp);
     }
@@ -182,20 +182,20 @@ public class ProductController extends HttpServlet {
     public void handleAddProduct(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Part imagePart = req.getPart("image");
         String name = req.getParameter("productName");
-        System.out.println("Product Name: " + name);
+        log.info("Product Name: " + name);
         String description = req.getParameter("description");
         int priceStr = 0;
         if (req.getParameter("price") != null && !req.getParameter("price").isEmpty()) {
             priceStr = ValidateProduct.getIntegerValue(req.getParameter("price"));
             if (priceStr == -1) {
-                System.out.println("Invalid price format");
+                log.info("Invalid price format");
             }
         }
         int categoryIdStr = 0;
         if (req.getParameter("category") != null) {
             categoryIdStr = ValidateProduct.getIntegerValue(req.getParameter("category"));
             if (categoryIdStr == -1) {
-                System.out.println("Invalid category format");
+                log.error("Invalid category format");
             }
         }
         int purchaseCost = 0;
@@ -234,7 +234,7 @@ public class ProductController extends HttpServlet {
             }
         }
 
-        System.out.println("Image URL: " + imageUrl);
+        log.info("Image URL: " + imageUrl);
         Product product = new Product().builder()
                 .productName(name)
                 .description(description)
@@ -247,7 +247,7 @@ public class ProductController extends HttpServlet {
                 .build();
         // Save the product to the database
         int isAdded = productService.addProduct(product);
-        System.out.println("Add Product: " + isAdded);
+        log.info("Add Product: " + isAdded);
         if (isAdded != -1) {
             // Redirect to the product list page with success message
             req.setAttribute("message", "Product added successfully!");
@@ -261,7 +261,7 @@ public class ProductController extends HttpServlet {
 
     public void handleUpdateProductDetail(HttpServletRequest req, HttpServletResponse resp) throws
             ServletException, IOException {
-        System.out.println(req.getParameter("productId"));
+        log.info(req.getParameter("productId"));
         int productId = Integer.parseInt(req.getParameter("productId"));
         Part imagePart = req.getPart("image");
         String name = req.getParameter("productName");
@@ -299,7 +299,7 @@ public class ProductController extends HttpServlet {
             }
         }
         // Log the image URL for debugging
-        System.out.println("Image URL: " + imageUrl);
+        log.info("Image URL: " + imageUrl);
         Product product = new Product().builder()
                 .productId(productId)
                 .productName(name)
@@ -323,4 +323,6 @@ public class ProductController extends HttpServlet {
             req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
         }
     }
+
+
 }

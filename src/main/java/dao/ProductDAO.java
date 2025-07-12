@@ -1,6 +1,9 @@
 package dao;
 
+import controller.ProductController;
 import entites.Product;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.DBContext;
 
 import java.sql.Connection;
@@ -11,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductDAO extends DBContext {
-
-    public List<Product> getAllProducts(int categoryId, int status) {
+    private static final Logger log = LoggerFactory.getLogger(ProductDAO.class);
+    public List<Product> getAllProducts(int categoryId, int status, String searchQuery) {
         StringBuilder sql = new StringBuilder("SELECT * FROM Product WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -24,6 +27,11 @@ public class ProductDAO extends DBContext {
         if (status != -1) {
             sql.append(" AND status = ?");
             params.add(status);
+        }
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            sql.append(" AND (product_name LIKE ? OR description LIKE ?)");
+            params.add("%" + searchQuery + "%");
+            params.add("%" + searchQuery + "%");
         }
 
         List<Product> products = new ArrayList<>();
@@ -42,14 +50,14 @@ public class ProductDAO extends DBContext {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
             return null;
         }
 
         return products;
     }
 
-    public List<Product> getListProductPaginate(int pageNo, Integer categoryId, Integer status) {
+    public List<Product> getListProductPaginate(int pageNo, Integer categoryId, Integer status, String searchQuery) {
         StringBuilder sql = new StringBuilder("SELECT * FROM Product WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
@@ -61,6 +69,11 @@ public class ProductDAO extends DBContext {
         if (status != null && status != -1) {
             sql.append(" AND status = ?");
             params.add(status);
+        }
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            sql.append(" AND (product_name LIKE ? OR description LIKE ?)");
+            params.add("%" + searchQuery + "%");
+            params.add("%" + searchQuery + "%");
         }
 
         sql.append(" LIMIT ?, 6");
@@ -82,7 +95,7 @@ public class ProductDAO extends DBContext {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
             return null;
         }
         return products;
@@ -114,7 +127,7 @@ public class ProductDAO extends DBContext {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
         }
         return -1; // Trả về -1 nếu có lỗi
     }
@@ -129,7 +142,7 @@ public class ProductDAO extends DBContext {
             return getProductFromRs(rs);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
         }
         return null;
     }
@@ -150,7 +163,7 @@ public class ProductDAO extends DBContext {
             return stmt.executeUpdate() > 0;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
             return false;
         }
     }
@@ -162,7 +175,7 @@ public class ProductDAO extends DBContext {
             stmt.setInt(1, productId);
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
             return false;
         }
     }
@@ -174,7 +187,7 @@ public class ProductDAO extends DBContext {
             stmt.setInt(1, productId);
             return stmt.executeUpdate() > 0;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
             return false;
         }
     }
@@ -197,13 +210,46 @@ public class ProductDAO extends DBContext {
                         .build();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("SQL Error: {}", e.getMessage());
         }
         return null;
     }
 
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO();
-        System.out.println(dao.getProductById(7));
+//        System.out.println(dao.getProductById(7));
+        List<Product> products = dao.searchProducts("Sneaker");
+        if (products != null) {
+            System.out.println("Found " + products.size() + " products:");
+            for (Product product : products) {
+                System.out.println(product);
+            }
+        } else {
+            System.out.println("No products found.");
+        }
     }
+
+    public List<Product> searchProducts(String searchQuery) {
+        String sql = "SELECT * FROM Product WHERE product_name LIKE ? OR description LIKE ?";
+        List<Product> products = new ArrayList<>();
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + searchQuery + "%");
+            stmt.setString(2, "%" + searchQuery + "%");
+
+            ResultSet rs = stmt.executeQuery();
+            while (true) {
+                Product product = getProductFromRs(rs);
+                if (product == null) break;
+                products.add(product);
+            }
+
+        } catch (Exception e) {
+            log.error("SQL Error: {}", e.getMessage());
+            return null;
+        }
+        return products;
+    }
+
 }
