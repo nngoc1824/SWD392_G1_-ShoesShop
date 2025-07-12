@@ -11,7 +11,7 @@ import java.io.IOException;
 @WebServlet("/cancel")
 public class CancelServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/cancel.jsp").forward(req, resp);
+        req.getRequestDispatcher("/checkout/cancel.jsp").forward(req, resp);
     }
 }
 

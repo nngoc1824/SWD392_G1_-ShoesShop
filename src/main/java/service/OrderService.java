@@ -1,16 +1,14 @@
 package service;
 
 
+import dao.OrderDAO;
 import entites.Order;
-import entites.PaymentStatus;
-import org.springframework.stereotype.Service;
-import repository.OrderRepository;
 
-import java.util.Optional;
 
-@Service
 public class OrderService {
+    private final OrderDAO orderDAO = new OrderDAO();
 
+<<<<<<< Updated upstream
     private OrderRepository orderRepository;
 
     public OrderService(OrderRepository orderRepository) {
@@ -31,5 +29,9 @@ public class OrderService {
             return true;
         }
         return false;
+=======
+    public Order getOrderById(int orderId) {
+        return  orderDAO.getOrderById(orderId);
+>>>>>>> Stashed changes
     }
 }

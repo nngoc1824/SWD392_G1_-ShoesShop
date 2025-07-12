@@ -32,12 +32,12 @@ public class PaymentLinkServlet extends HttpServlet {
             ItemData item = ItemData.builder()
                     .name("Đơn hàng #" + orderCode)
                     .quantity(1)
-                    .price(order.getTotalPrice().intValue())
+                    .price((int) order.getTotalPrice())
                     .build();
 
             PaymentData paymentData = PaymentData.builder()
                     .orderCode(orderCode)
-                    .amount(order.getTotalPrice().intValue())
+                    .amount((int) order.getTotalPrice())
                     .description("Thanh toán đơn hàng: " + order.getShipAddress())
                     .returnUrl(returnUrl)
                     .cancelUrl(cancelUrl)

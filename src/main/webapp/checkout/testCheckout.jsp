@@ -11,7 +11,7 @@
     <title>Title</title>
 </head>
 <body>
-<form action="/create" method="post">
+<form action="${pageContext.request.contextPath}/create" method="get">
 
   <!-- Ẩn ID -->
   <input type="hidden" name="orderId" value="1" />

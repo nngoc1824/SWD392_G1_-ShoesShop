@@ -37,10 +37,10 @@ public class PaymentWebhookServlet extends HttpServlet {
             String status = data.getCode();
 
             PaymentStatus newStatus = PaymentStatus.valueOf(status);
-            boolean updated = orderService.updateOrderStatus(orderCode, newStatus);
+//            boolean updated = orderService.updateOrderStatus(orderCode, newStatus);
 
             responseJson.put("error", 0);
-            responseJson.put("message", updated ? "Order updated" : "Order not found");
+//            responseJson.put("message", updated ? "Order updated" : "Order not found");
             responseJson.set("data", mapper.valueToTree(data));
 
         } catch (Exception e) {
