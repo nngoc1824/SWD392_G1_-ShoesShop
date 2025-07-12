@@ -30,12 +30,12 @@ public class OrderServlet extends HttpServlet {
             ItemData item = ItemData.builder()
                     .name(description)
                     .quantity(1)
-                    .price(order.getTotalPrice().intValue())
+                    .price((int) order.getTotalPrice())
                     .build();
 
             PaymentData paymentData = PaymentData.builder()
                     .orderCode(orderCode)
-                    .amount(order.getTotalPrice().intValue())
+                    .amount((int) order.getTotalPrice())
                     .description(description)
                     .returnUrl("https://yourdomain.com/order/success")
                     .cancelUrl("https://yourdomain.com/order/cancel")

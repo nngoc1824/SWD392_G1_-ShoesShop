@@ -11,7 +11,7 @@ import java.io.IOException;
 @WebServlet("/success")
 public class SuccessServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/success.jsp").forward(req, resp);
+        req.getRequestDispatcher("/checkout/success.jsp").forward(req, resp);
     }
 }
 

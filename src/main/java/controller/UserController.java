@@ -147,16 +147,23 @@ public class UserController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession(false);
-        User sessionUser = (User) session.getAttribute("user");
-
-        if (sessionUser == null) {
+        if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
+        User sessionUser = (User) session.getAttribute("user");
+
         String currentPassword = request.getParameter("currentPassword");
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
+
+        // ⚠️ Nếu user login bằng Google hoặc thiếu mật khẩu, không cho đổi
+        if (sessionUser.getPassword() == null) {
+            request.setAttribute("error", "Tài khoản không hỗ trợ đổi mật khẩu.");
+            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            return;
+        }
 
         if (!sessionUser.getPassword().equals(currentPassword)) {
             request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
@@ -172,7 +179,7 @@ public class UserController extends HttpServlet {
 
         boolean updated = userDAO.updateUserPassword(sessionUser.getUserId(), newPassword);
         if (updated) {
-            sessionUser.setPassword(newPassword); // Cập nhật lại password trong session
+            sessionUser.setPassword(newPassword); // Cập nhật session
             request.setAttribute("success", "Đổi mật khẩu thành công.");
         } else {
             request.setAttribute("error", "Lỗi khi đổi mật khẩu.");
@@ -180,6 +187,7 @@ public class UserController extends HttpServlet {
 
         request.getRequestDispatcher("change-password.jsp").forward(request, response);
     }
+
 
 
 

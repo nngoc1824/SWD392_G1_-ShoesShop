@@ -12,12 +12,12 @@ import java.io.IOException;
 
 @WebServlet("/create")
 public class CreateServlet extends HttpServlet {
-    private OrderService orderService;
+    private final OrderService orderService = new OrderService();
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Integer id = Integer.parseInt(req.getParameter("id"));
-        Order order = orderService.findByOrderId(id);
+        int id = Integer.parseInt(req.getParameter("orderId"));
+        Order order = orderService.getOrderById(id);
         req.setAttribute("order", order);
-        req.getRequestDispatcher("/create.jsp").forward(req, resp);
+        req.getRequestDispatcher("/checkout/create.jsp").forward(req, resp);
     }
 }

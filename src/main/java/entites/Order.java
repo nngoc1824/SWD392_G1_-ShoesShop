@@ -1,31 +1,19 @@
 package entites;
 
-import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.util.Date;
 
-@Entity
-@Table(name = "orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Order {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer orderId;
-
-    private Long orderCode; // Mã đơn hàng từ PayOS
-
-    private Double totalPrice;
-
-    private LocalDateTime orderDate;
-
-    private Boolean isDelivered;
-
+    private int orderId;
+    private double totalPrice;
+    private Date orderDate;
+    private boolean status;
     private String shipAddress;
+    private String paymentStatus;
+    private int userId;
 
-    @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
 }
