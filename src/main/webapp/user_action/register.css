@@ -39,8 +39,19 @@ body {
     color: #005caa;
 }
 
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
 .form-group input[type="text"],
-.form-group input[type="password"] {
+.form-group input[type="password"],
+.form-group input[type="email"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
@@ -69,27 +80,6 @@ body {
 
 .form-actions input[type="submit"]:hover {
     background-color: #003e73;
-}
-
-.google-login {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.google-login a {
-    text-decoration: none;
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #db4437;
-    color: white;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.google-login img {
-    width: 20px;
-    vertical-align: middle;
-    margin-right: 8px;
 }
 
 .links {

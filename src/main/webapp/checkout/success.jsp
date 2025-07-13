@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thmeleaf.org">
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thanh toán thành công</title>
-  <link rel="stylesheet" href="" th:href="@{/css/style.css}">
+    <title>Thanh toán thành công</title>
 </head>
 <body>
-<div class="main-box">
-  <h4 class="payment-titlte">Thanh toán thành công. Cảm ơn bạn đã sử dụng payOS!</h4>
-  <p>Nếu có bất kỳ câu hỏi nào, hãy gửi email tới <a href="mailto:support@payos.vn">support@payos.vn</a></p>
-  <a href="/create" id="return-page-btn">Trở về trang Tạo Link thanh toán</a>
-</div>
-<script src="script.js"></script>
+    <h2 style="color: green;">🎉 Cảm ơn bạn!</h2>
+    <p>Đơn hàng đã được thanh toán thành công qua PayOS.</p>
+    <a href="/home">Quay về trang chủ</a>
 </body>
 </html>

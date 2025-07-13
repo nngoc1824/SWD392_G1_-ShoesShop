@@ -11,10 +11,10 @@
     <title>Title</title>
 </head>
 <body>
-<form action="/create" method="post">
+<form action="${pageContext.request.contextPath}/create" method="get">
 
   <!-- Ẩn ID -->
-  <input type="hidden" name="orderId" value="1" />
+  <input type="hidden" name="cartId" value="1" />
 
   <button type="submit">Tạo Link thanh toán</button>
 </form>

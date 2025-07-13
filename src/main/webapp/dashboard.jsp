@@ -78,6 +78,7 @@
 <body>
 
 <div class="container">
+
   <h2>Chào mừng, <%= user.getFullName() %>!</h2>
 
   <!-- ✅ Hiển thị ảnh đại diện nếu có -->
@@ -117,6 +118,10 @@
   <div class="buttons">
     <a href="profile.jsp">Chỉnh sửa hồ sơ</a>
     <a href="user?action=logout" class="logout">Đăng xuất</a>
+  </div>
+
+  <div class="buttons">
+    <a href="home">Home Page</a>
   </div>
 </div>
 

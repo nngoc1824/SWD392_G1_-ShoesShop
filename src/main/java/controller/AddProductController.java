@@ -1,7 +1,5 @@
 package controller;
 
-import dao.CategoryDAO;
-import dao.ProductDAO;
 import entites.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
