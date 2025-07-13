@@ -217,8 +217,8 @@ public class ProductDAO extends DBContext {
 
     public static void main(String[] args) {
         ProductDAO dao = new ProductDAO();
-//        System.out.println(dao.getProductById(7));
-        List<Product> products = dao.searchProducts("Sneaker");
+        System.out.println(dao.getProductById(1));
+        List<Product> products = dao.searchProducts("");
         if (products != null) {
             System.out.println("Found " + products.size() + " products:");
             for (Product product : products) {

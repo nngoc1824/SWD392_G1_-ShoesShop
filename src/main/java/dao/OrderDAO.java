@@ -13,9 +13,9 @@ public class OrderDAO {
         this.conn = conn;
     }
 
-    //Tạo đơn hàng mới
+    // Tạo đơn hàng mới
     public int create(Order order) throws SQLException {
-        String sql = "INSERT INTO orders (total_price, order_date, status, ship_address, payment_status, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `Order` (total_price, order_date, status, ship_address, payment_status, user_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setDouble(1, order.getTotalPrice());
             stmt.setTimestamp(2, new Timestamp(order.getOrderDate().getTime()));
@@ -31,28 +31,24 @@ public class OrderDAO {
         return -1;
     }
 
-    //Tìm đơn hàng theo ID
+    // Tìm đơn hàng theo ID
     public Optional<Order> findById(int orderId) throws SQLException {
-        String sql = "SELECT * FROM orders WHERE order_id = ?";
+        String sql = "SELECT * FROM `Order` WHERE order_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, orderId);
             ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return Optional.of(mapRow(rs));
-            }
+            if (rs.next()) return Optional.of(mapRow(rs));
         }
         return Optional.empty();
     }
 
-    //Tìm đơn hàng theo userId
+    // Tìm đơn hàng theo userId
     public List<Order> findByUserId(int userId) throws SQLException {
-        String sql = "SELECT * FROM orders WHERE user_id = ?";
+        String sql = "SELECT * FROM `Order` WHERE user_id = ?";
         List<Order> orders = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
-
             while (rs.next()) {
                 orders.add(mapRow(rs));
             }
@@ -60,9 +56,9 @@ public class OrderDAO {
         return orders;
     }
 
-    //Lấy đơn chưa thanh toán
+    // Lấy đơn chưa thanh toán
     public List<Order> findUnpaidOrders() throws SQLException {
-        String sql = "SELECT * FROM orders WHERE status = false OR payment_status != 'Paid'";
+        String sql = "SELECT * FROM `Order` WHERE status = false OR payment_status != 'Paid'";
         List<Order> orders = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -73,9 +69,9 @@ public class OrderDAO {
         return orders;
     }
 
-    //Cập nhật trạng thái thanh toán
+    // Cập nhật trạng thái thanh toán
     public boolean updateStatus(int orderId, boolean status, String paymentStatus) throws SQLException {
-        String sql = "UPDATE orders SET status = ?, payment_status = ? WHERE order_id = ?";
+        String sql = "UPDATE `Order` SET status = ?, payment_status = ? WHERE order_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBoolean(1, status);
             stmt.setString(2, paymentStatus);
@@ -84,9 +80,9 @@ public class OrderDAO {
         }
     }
 
-    //Cập nhật địa chỉ giao hàng
+    // Cập nhật địa chỉ giao hàng
     public boolean updateAddress(int orderId, String newAddress) throws SQLException {
-        String sql = "UPDATE orders SET ship_address = ? WHERE order_id = ?";
+        String sql = "UPDATE `Order` SET ship_address = ? WHERE order_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newAddress);
             stmt.setInt(2, orderId);
@@ -94,16 +90,16 @@ public class OrderDAO {
         }
     }
 
-    //Xoá đơn hàng
+    // Xoá đơn hàng
     public boolean delete(int orderId) throws SQLException {
-        String sql = "DELETE FROM orders WHERE order_id = ?";
+        String sql = "DELETE FROM `Order` WHERE order_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, orderId);
             return stmt.executeUpdate() > 0;
         }
     }
 
-    //ánh xạ kết quả từ ResultSet sang Order
+    // Ánh xạ từ ResultSet sang đối tượng Order
     private Order mapRow(ResultSet rs) throws SQLException {
         return Order.builder()
                 .orderId(rs.getInt("order_id"))
@@ -115,4 +111,5 @@ public class OrderDAO {
                 .userId(rs.getInt("user_id"))
                 .build();
     }
+
 }

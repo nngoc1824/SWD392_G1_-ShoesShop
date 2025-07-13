@@ -13,121 +13,146 @@ import service.OrderService;
 import utils.DBContext;
 import utils.PayOSInitializer;
 import vn.payos.PayOS;
-import vn.payos.type.*;
+import vn.payos.type.CheckoutResponseData;
+import vn.payos.type.ItemData;
+import vn.payos.type.PaymentData;
+import vn.payos.type.Webhook;
+import vn.payos.type.WebhookData;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-@WebServlet("/checkout/*")
+@WebServlet(urlPatterns = {"/checkout/create", "/checkout/confirm-webhook"})
 public class CheckoutServlet extends HttpServlet {
     private final PayOS payOS = PayOSInitializer.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String path = req.getPathInfo();
-        ObjectNode responseJson = mapper.createObjectNode();
-
-        if ("/create".equals(path)) {
-            try {
-                // Đọc giỏ hàng từ cookie
-                List<CartItem> cartItems = getCartItemsFromCookie(req);
-
-                if (cartItems.isEmpty()) {
-                    resp.sendRedirect("/cart.jsp");
-                    return;
-                }
-
-                // Lấy dữ liệu form
-                String firstName = req.getParameter("firstName");
-                String lastName = req.getParameter("lastName");
-                String email = req.getParameter("email");
-                String phone = req.getParameter("phone");
-                String address = req.getParameter("address");
-                String province = req.getParameter("province");
-                String district = req.getParameter("district");
-                String ward = req.getParameter("ward");
-
-                String fullAddress = address + ", " + ward + ", " + district + ", " + province;
-
-                // Tính tổng tiền từ giỏ hàng
-                double total = 0;
-                for (CartItem item : cartItems) {
-                    total += item.getPrice() * item.getQuantity();
-                }
-
-                long orderCode = System.currentTimeMillis() % 1_000_000;
-                String description = "Thanh toán đơn hàng của " + firstName + " " + lastName;
-
-                ItemData item = ItemData.builder()
-                        .name(description)
-                        .quantity(1)
-                        .price((int) total)
-                        .build();
-
-                PaymentData paymentData = PaymentData.builder()
-                        .orderCode(orderCode)
-                        .amount((int) total)
-                        .description(description)
-                        .returnUrl("http://localhost:8080/checkout/success.jsp")
-                        .cancelUrl("http://localhost:8080/checkout/cancel.jsp")
-                        .item(item)
-                        .build();
-
-                // Tạm dựng đơn hàng và lưu vào session để xử lý sau khi thanh toán
-                Order order = Order.builder()
-                        .shipAddress(fullAddress)
-                        .totalPrice(total)
-                        .status(false)
-                        .paymentStatus("Pending")
-                        .build();
-
-                req.getSession().setAttribute("pendingOrder", order);
-                resp.sendRedirect(payOS.createPaymentLink(paymentData).getCheckoutUrl());
-            } catch (Exception e) {
-                e.printStackTrace();
-                resp.sendRedirect("/checkout/error.jsp");
-            }
-        }
-        else if ("/confirm-webhook".equals(path)) {
-            try {
-                JsonNode payload = mapper.readTree(req.getInputStream());
-
-                // Kiểm tra nếu success = true
-                boolean success = payload.has("success") && payload.get("success").asBoolean();
-                JsonNode dataNode = payload.get("data");
-
-                long orderCode = (dataNode != null && dataNode.has("orderCode")) ? dataNode.get("orderCode").asLong() : -1;
-                String code = (dataNode != null && dataNode.has("code")) ? dataNode.get("code").asText() : "";
-
-                // Nếu thanh toán thành công thì lưu đơn hàng
-                if (success && "00".equals(code) && orderCode != -1) {
-                    HttpSession session = req.getSession();
-                    Order pendingOrder = (Order) session.getAttribute("pendingOrder");
-
-                    if (pendingOrder != null) {
-                        pendingOrder.setOrderDate(new java.util.Date());
-                        pendingOrder.setStatus(true);
-                        pendingOrder.setPaymentStatus("Paid");
-
-                        try (Connection conn = new DBContext().getConnection()) {
-                            OrderService service = new OrderService(conn);
-                            service.save(pendingOrder);
-                        }
-
-                        session.removeAttribute("pendingOrder");
-                    } else {
-                        System.out.println("⚠️ Không tìm thấy đơn hàng trong session.");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        String path = req.getServletPath();
+        switch (path) {
+            case "/checkout/create" -> handleCreatePayment(req, resp);
+            case "/checkout/confirm-webhook" -> handleWebhook(req, resp);
+            default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
+
+    private void handleCreatePayment(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            List<CartItem> cartItems = getCartItemsFromCookie(req);
+
+            if (cartItems.isEmpty()) {
+                resp.sendRedirect("/cart.jsp");
+                return;
+            }
+
+            String firstName = req.getParameter("firstName");
+            String lastName = req.getParameter("lastName");
+
+            double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+
+            String address = req.getParameter("address");
+            String province = req.getParameter("province");
+            String district = req.getParameter("district");
+            String ward = req.getParameter("ward");
+            String fullAddress = address + ", " + ward + ", " + district + ", " + province;
+
+            long orderCode = generateOrderCode();
+
+            String description = "Don hang " + orderCode;
+
+            ItemData item = ItemData.builder()
+                    .name(description)
+                    .quantity(1)
+                    .price((int) total)
+                    .build();
+
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderCode)
+                    .amount((int) total)
+                    .description(description)
+                    .returnUrl(getBaseUrl(req) + "/checkout/success.jsp")
+                    .cancelUrl(getBaseUrl(req) + "/checkout/cancel.jsp")
+                    .item(item)
+                    .build();
+
+            Order pendingOrder = Order.builder()
+                    .shipAddress(fullAddress)
+                    .totalPrice(total)
+                    .status(false)
+                    .paymentStatus("Pending")
+                    .orderDate(new Date())
+                    .build();
+
+            req.getSession().setAttribute("pendingOrder", pendingOrder);
+
+            CheckoutResponseData checkoutData = payOS.createPaymentLink(paymentData);
+
+            resp.sendRedirect(checkoutData.getCheckoutUrl());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("/checkout/error.jsp");
+        }
+    }
+
+    private void handleWebhook(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            JsonNode body = mapper.readTree(req.getInputStream());
+            Webhook webhook = mapper.treeToValue(body, Webhook.class);
+
+            WebhookData data = payOS.verifyPaymentWebhookData(webhook);
+            System.out.println("✅ Webhook Verified: " + data);
+
+            long orderCode = data.getOrderCode();
+
+            HttpSession session = req.getSession();
+            Order pendingOrder = (Order) session.getAttribute("pendingOrder");
+
+            if (pendingOrder != null && pendingOrder.getOrderId() == orderCode) {
+                pendingOrder.setStatus(true);
+                pendingOrder.setPaymentStatus("Paid");
+                pendingOrder.setOrderDate(new Date());
+
+                try (Connection conn = new DBContext().getConnection()) {
+                    OrderService service = new OrderService(conn);
+                    service.save(pendingOrder);
+                }
+
+                session.removeAttribute("pendingOrder");
+                System.out.println("✅ Đơn hàng đã lưu vào DB.");
+            } else {
+                System.out.println("⚠️ Không tìm thấy đơn hàng khớp trong session.");
+            }
+
+            ObjectNode responseJson = mapper.createObjectNode();
+            responseJson.put("error", 0);
+            responseJson.put("message", "Webhook delivered");
+            resp.setContentType("application/json");
+            resp.getWriter().write(responseJson.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            ObjectNode responseJson = mapper.createObjectNode();
+            responseJson.put("error", -1);
+            responseJson.put("message", e.getMessage());
+            resp.setContentType("application/json");
+            resp.getWriter().write(responseJson.toString());
+        }
+    }
+
+    private long generateOrderCode() {
+        String timePart = String.valueOf(System.currentTimeMillis());
+        String last6 = timePart.substring(timePart.length() - 6);
+        int random = (int) (Math.random() * 9000) + 1000;
+        return Long.parseLong(last6 + random);
+    }
+
     private List<CartItem> getCartItemsFromCookie(HttpServletRequest req) {
-        List<CartItem> cartItems = new java.util.ArrayList<>();
+        List<CartItem> cartItems = new ArrayList<>();
         Cookie[] cookies = req.getCookies();
 
         if (cookies != null) {
@@ -135,23 +160,20 @@ public class CheckoutServlet extends HttpServlet {
                 if ("cart".equals(cookie.getName())) {
                     String value = java.net.URLDecoder.decode(cookie.getValue(), java.nio.charset.StandardCharsets.UTF_8);
                     String[] pairs = value.split(",");
-
                     for (String pair : pairs) {
                         String[] parts = pair.split(":");
                         if (parts.length == 2) {
                             try {
                                 int productId = Integer.parseInt(parts[0]);
                                 int quantity = Integer.parseInt(parts[1]);
-
-                                // Gọi đến ProductService hoặc fix tạm giá tại đây
                                 double price = getPriceByProductId(productId);
-
                                 cartItems.add(CartItem.builder()
                                         .productId(productId)
                                         .quantity(quantity)
                                         .price(price)
                                         .build());
-                            } catch (Exception ignore) {}
+                            } catch (Exception ignore) {
+                            }
                         }
                     }
                 }
@@ -164,8 +186,19 @@ public class CheckoutServlet extends HttpServlet {
     private double getPriceByProductId(int productId) {
         ProductDAO dao = new ProductDAO();
         Product product = dao.getProductById(productId);
-
         return product != null ? product.getPrice() : 0;
     }
 
+    private String getBaseUrl(HttpServletRequest request) {
+        String scheme = request.getScheme();
+        String serverName = request.getServerName();
+        int serverPort = request.getServerPort();
+        String contextPath = request.getContextPath();
+        String url = scheme + "://" + serverName;
+        if ((scheme.equals("http") && serverPort != 80) || (scheme.equals("https") && serverPort != 443)) {
+            url += ":" + serverPort;
+        }
+        url += contextPath;
+        return url;
+    }
 }

@@ -54,7 +54,7 @@
             <hr class="my-4">
 
             <h5>Customer Information</h5>
-            <form action="placeOrder" method="post">
+            <form action="${pageContext.request.contextPath}/checkout/create" method="post">
                 <div class="form-group">
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>
