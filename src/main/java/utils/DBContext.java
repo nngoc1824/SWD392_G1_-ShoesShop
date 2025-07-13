@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBContext {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url = "jdbc:mysql://localhost:3306/OSSgi?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String user = "root";
 
         String password = "1234";

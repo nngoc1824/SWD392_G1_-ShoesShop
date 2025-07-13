@@ -2,6 +2,7 @@ package controller;
 
 import dao.UserDAO;
 import entites.User;
+import entites.Address;
 import jakarta.servlet.annotation.MultipartConfig;
 import utils.CloudinaryConfig;
 import utils.DBContext;
@@ -246,11 +247,23 @@ public class UserController extends HttpServlet {
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String provinceId = request.getParameter("province");
+        String districtId = request.getParameter("district");
+        String wardCode = request.getParameter("ward");
+
 
         sessionUser.setFullName(fullName);
         sessionUser.setEmail(email);
         sessionUser.setPhone(phone);
         sessionUser.setImage(imageUrl);
+        session.setAttribute("ghn_address", address);
+        session.setAttribute("ghn_province", provinceId);
+        session.setAttribute("ghn_district", districtId);
+        session.setAttribute("ghn_ward", wardCode);
+
+
+
 
         boolean updated = userDAO.updateUser(sessionUser);
 
