@@ -5,14 +5,13 @@ import entites.User;
 import jakarta.servlet.annotation.MultipartConfig;
 import utils.CloudinaryConfig;
 import utils.DBContext;
-
+import utils.EmailValidate;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import utils.GoogleUtils;
-
 import java.io.IOException;
 import java.sql.Connection;
+
 @MultipartConfig
 @WebServlet(name = "UserController", urlPatterns = {"/user"})
 public class UserController extends HttpServlet {
@@ -43,11 +42,9 @@ public class UserController extends HttpServlet {
                 case "login":
                     handleLogin(request, response, userDAO);
                     break;
-
                 case "register":
                     handleRegister(request, response, userDAO);
                     break;
-
                 case "logout":
                     handleLogout(request, response);
                     break;
@@ -57,9 +54,9 @@ public class UserController extends HttpServlet {
                 case "changePassword":
                     handleChangePassword(request, response, userDAO);
                     break;
-
-
-
+                case "verify":
+                    handleVerify(request, response);
+                    break;
 
                 default:
                     response.sendRedirect("login.jsp");
@@ -122,15 +119,54 @@ public class UserController extends HttpServlet {
                 .email(email)
                 .fullName(fullName)
                 .phone(phone)
-                .status(1)
+                .status(0) // chưa kích hoạt
                 .build();
 
         boolean isSuccess = userDAO.register(user);
         if (isSuccess) {
-            response.sendRedirect("login.jsp");
+            String code = String.valueOf((int) (Math.random() * 900000) + 100000);
+            EmailValidate.send(email, "Mã xác minh tài khoản", code);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("verificationCode", code);
+            session.setAttribute("pendingEmail", email);
+
+            response.sendRedirect("verify.jsp");
         } else {
             request.setAttribute("error", "Đăng ký thất bại.");
             request.getRequestDispatcher("register.jsp").forward(request, response);
+        }
+    }
+
+    private void handleVerify(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        String expectedCode = (String) session.getAttribute("verificationCode");
+        String enteredCode = request.getParameter("code");
+
+        if (expectedCode != null && expectedCode.equals(enteredCode)) {
+            String email = (String) session.getAttribute("pendingEmail");
+
+            try (Connection conn = new DBContext().getConnection()) {
+                if (UserDAO.activateUserByEmail(email, conn)) {
+                    session.removeAttribute("verificationCode");
+                    session.removeAttribute("pendingEmail");
+                    request.setAttribute("message", "Xác minh thành công! Bạn có thể đăng nhập.");
+                    request.getRequestDispatcher("login.jsp").forward(request, response);
+                } else {
+                    request.setAttribute("error", "Không thể kích hoạt tài khoản.");
+                    request.getRequestDispatcher("verify.jsp").forward(request, response);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Đã xảy ra lỗi khi xác minh tài khoản.");
+                request.getRequestDispatcher("verify.jsp").forward(request, response);
+            }
+
+        } else {
+            request.setAttribute("error", "Mã xác minh không đúng.");
+            request.getRequestDispatcher("verify.jsp").forward(request, response);
         }
     }
 
@@ -158,7 +194,6 @@ public class UserController extends HttpServlet {
         String newPassword = request.getParameter("newPassword");
         String confirmPassword = request.getParameter("confirmPassword");
 
-        // ⚠️ Nếu user login bằng Google hoặc thiếu mật khẩu, không cho đổi
         if (sessionUser.getPassword() == null) {
             request.setAttribute("error", "Tài khoản không hỗ trợ đổi mật khẩu.");
             request.getRequestDispatcher("change-password.jsp").forward(request, response);
@@ -179,7 +214,7 @@ public class UserController extends HttpServlet {
 
         boolean updated = userDAO.updateUserPassword(sessionUser.getUserId(), newPassword);
         if (updated) {
-            sessionUser.setPassword(newPassword); // Cập nhật session
+            sessionUser.setPassword(newPassword);
             request.setAttribute("success", "Đổi mật khẩu thành công.");
         } else {
             request.setAttribute("error", "Lỗi khi đổi mật khẩu.");
@@ -187,10 +222,6 @@ public class UserController extends HttpServlet {
 
         request.getRequestDispatcher("change-password.jsp").forward(request, response);
     }
-
-
-
-
 
     private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
             throws ServletException, IOException {
@@ -204,7 +235,6 @@ public class UserController extends HttpServlet {
         String imageUrl = "";
 
         if (imagePart != null && imagePart.getSize() > 0) {
-
             try {
                 imageUrl = CloudinaryConfig.updloadImage(imagePart);
             } catch (Exception e) {
@@ -217,7 +247,6 @@ public class UserController extends HttpServlet {
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
 
-        // Cập nhật đối tượng User trong session
         sessionUser.setFullName(fullName);
         sessionUser.setEmail(email);
         sessionUser.setPhone(phone);
@@ -235,7 +264,3 @@ public class UserController extends HttpServlet {
         request.getRequestDispatcher("profile.jsp").forward(request, response);
     }
 }
-
-
-
-

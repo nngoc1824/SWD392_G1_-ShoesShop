@@ -2,14 +2,11 @@ package dao;
 
 import entites.User;
 import utils.DBContext;
+
 import java.sql.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 public class UserDAO {
-    private static Connection conn;
+    private final Connection conn;
 
     public UserDAO(Connection conn) {
         this.conn = conn;
@@ -17,7 +14,7 @@ public class UserDAO {
 
     // ✅ Đăng nhập: kiểm tra username + password
     public User login(String username, String password) {
-        String sql = "SELECT * FROM User WHERE userName = ? AND password = ?";
+        String sql = "SELECT * FROM User WHERE user_name = ? AND password = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ps.setString(2, password);
@@ -25,15 +22,15 @@ public class UserDAO {
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 return User.builder()
-                        .userId(rs.getInt("userId"))
-                        .userName(rs.getString("userName"))
+                        .userId(rs.getInt("user_id"))
+                        .userName(rs.getString("user_name"))
                         .password(rs.getString("password"))
                         .email(rs.getString("email"))
-                        .fullName(rs.getString("fullName"))
+                        .fullName(rs.getString("full_name"))
                         .phone(rs.getString("phone"))
                         .image(rs.getString("image"))
                         .status(rs.getInt("status"))
-                        .addressId(rs.getInt("addressId"))
+                        .googleId(rs.getString("google_id"))
                         .build();
             }
         } catch (SQLException e) {
@@ -44,7 +41,7 @@ public class UserDAO {
 
     // ✅ Đăng ký: thêm user mới
     public boolean register(User user) {
-        String sql = "INSERT INTO User(userName, password, email, fullName, phone, status) " +
+        String sql = "INSERT INTO User(user_name, password, email, full_name, phone, status) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getUserName());
@@ -61,13 +58,13 @@ public class UserDAO {
         return false;
     }
 
-    // 🧩 Có thể thêm phương thức kiểm tra trùng username nếu cần
+    // ✅ Kiểm tra username tồn tại
     public boolean isUsernameTaken(String username) {
-        String sql = "SELECT 1 FROM User WHERE userName = ?";
+        String sql = "SELECT 1 FROM User WHERE user_name = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
-            return rs.next(); // tồn tại username
+            return rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -75,7 +72,7 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE User SET fullName = ?, email = ?, phone = ?, image =? WHERE userId = ?";
+        String sql = "UPDATE User SET full_name = ?, email = ?, phone = ?, image = ? WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
@@ -90,88 +87,62 @@ public class UserDAO {
         return false;
     }
 
-    public class SignWithGoogleDAO {
-        private Connection conn;
-
-        public SignWithGoogleDAO(Connection conn) {
-            this.conn = conn;
-        }
-    }
-
-        public User getUserByEmail(String email) throws SQLException {
-            String sql = "SELECT * FROM User WHERE email = ?";
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, email);
-                ResultSet rs = ps.executeQuery();
-                if (rs.next()) {
-                    return User.builder()
-                            .userId(rs.getInt("userId"))
-                            .userName(rs.getString("userName"))
-                            .email(rs.getString("email"))
-                            .fullName(rs.getString("fullName"))
-                            .image(rs.getString("image"))
-                            .build();
-                }
-            }
-            return null;
-        }
-
-    public static User findByGoogleId(String googleId) {
-        String sql = "SELECT * FROM User WHERE googleId = ?";
-        try (
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, googleId);
+    public User getUserByEmail(String email) throws SQLException {
+        String sql = "SELECT * FROM User WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("userId"));
-                user.setEmail(rs.getString("email"));
-                user.setFullName(rs.getString("fullName"));
-                user.setGoogleId(rs.getString("googleId"));
-
-                return user;
+                return User.builder()
+                        .userId(rs.getInt("user_id"))
+                        .userName(rs.getString("user_name"))
+                        .email(rs.getString("email"))
+                        .password(rs.getString("password"))
+                        .fullName(rs.getString("full_name"))
+                        .phone(rs.getString("phone"))
+                        .image(rs.getString("image"))
+                        .googleId(rs.getString("google_id"))
+                        .status(rs.getInt("status"))
+                        .build();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return null;
     }
 
-    public static void insertGoogleUser(User user) {
-        String sql = "INSERT INTO User (email, password, phone, fullName, googleId) " +
-                "VALUES (?, NULL, NULL, NULL, ?, ?)";
+    public static void insertGoogleUser(User user, Connection conn) {
+        String sql = "INSERT INTO User (user_name, password, email, full_name, phone, image, google_id, status) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, user.getEmail());         // email
-            ps.setString(2, user.getFullName());      // fullName
-            ps.setString(3, user.getGoogleId());      // googleId
+            String generatedUserName = user.getEmail();
+            ps.setString(1, generatedUserName);
+            ps.setString(2, "google");
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getFullName());
+            ps.setString(5, user.getPhone() == null ? "" : user.getPhone());
+            ps.setString(6, user.getImage() == null ? "" : user.getImage());
+            ps.setString(7, user.getGoogleId());
+            ps.setInt(8, 1);
+
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    public static User findByEmail(String email) {
-        String sql = "SELECT * FROM User WHERE email = ?";
+    public static boolean activateUserByEmail(String email, Connection conn) {
+        String sql = "UPDATE User SET status = 1 WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, email);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                User user = new User();
-                user.setUserId(rs.getInt("userId"));
-                user.setEmail(rs.getString("email"));
-                user.setPassword(rs.getString("password"));
-                user.setPhone(rs.getString("phone"));
-                user.setFullName(rs.getString("fullName"));
-                user.setGoogleId(rs.getString("googleId"));
-                return user;
-            }
-        } catch (Exception e) {
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
-    public static void updateGoogleId(User user) {
-        String sql = "UPDATE User SET googleId = ? WHERE userId = ?";
+
+    public static void updateGoogleId(User user, Connection conn) {
+        String sql = "UPDATE User SET google_id = ? WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getGoogleId());
             ps.setInt(2, user.getUserId());
@@ -182,7 +153,7 @@ public class UserDAO {
     }
 
     public boolean updateUserPassword(int userId, String newPassword) {
-        String sql = "UPDATE Users SET password = ? WHERE userId = ?";
+        String sql = "UPDATE User SET password = ? WHERE user_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, newPassword);
             ps.setInt(2, userId);
@@ -193,8 +164,25 @@ public class UserDAO {
         return false;
     }
 
-
-
+    public static User findByGoogleId(String googleId, Connection conn) {
+        String sql = "SELECT * FROM User WHERE google_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, googleId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return User.builder()
+                        .userId(rs.getInt("user_id"))
+                        .userName(rs.getString("user_name"))
+                        .email(rs.getString("email"))
+                        .fullName(rs.getString("full_name"))
+                        .image(rs.getString("image"))
+                        .googleId(rs.getString("google_id"))
+                        .status(rs.getInt("status"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
-
-
