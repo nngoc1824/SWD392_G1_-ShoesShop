@@ -11,8 +11,7 @@ import java.net.URL;
 @WebServlet("/getWards")
 public class WardServlet extends HttpServlet {
     private static final String TOKEN = "bdedfc18-5520-11f0-9b81-222185cb68c8";
-    private static final String API_URL = "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward";
-
+    private static final String API_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward";
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String districtId = request.getParameter("districtId");

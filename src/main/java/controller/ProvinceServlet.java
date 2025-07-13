@@ -9,7 +9,7 @@ import java.net.URL;
 
 @WebServlet("/getProvinces")
 public class ProvinceServlet extends HttpServlet {
-    private static final String TOKEN = "d6e3dccb-6289-11ea-8b85-c60e4edfe802";
+    private static final String TOKEN = "bdedfc18-5520-11f0-9b81-222185cb68c8";
     private static final String API_URL = "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province";
 
     @Override

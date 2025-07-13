@@ -21,7 +21,7 @@
 
         <!-- Right: Avatar + Cart -->
         <div class="d-flex align-items-center">
-            <a href="profile" class="text-dark mr-3">
+            <a href="login.jsp" class="text-dark mr-3">
                 <i class="fas fa-user-circle fa-lg"></i>
             </a>
             <a href="cart" class="text-dark">
