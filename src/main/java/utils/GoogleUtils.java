@@ -1,6 +1,5 @@
 package utils;
 
-
 import entites.User;
 import dao.UserDAO;
 import org.json.JSONObject;
@@ -11,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
 
 public class GoogleUtils {
     private static final String CLIENT_ID = "841040454506-pttbflftv7fu6qsdqpn7ju434hpag7be.apps.googleusercontent.com";
@@ -18,27 +18,31 @@ public class GoogleUtils {
     private static final String REDIRECT_URI = "http://localhost:8080/SWD392_ShoesShop_war_exploded/login-google";
 
     public static User handleGoogleLogin(String code) {
-        try {
+        try (Connection conn = new DBContext().getConnection()) {
             String token = getAccessToken(code);
             if (token == null) return null;
 
             User googleUser = getUserInfo(token);
-            System.out.println(googleUser);
-            if (googleUser == null || googleUser.getGoogleId() == null) return null;
-            UserDAO userDAO = new UserDAO(new DBContext().getConnection());
+            System.out.println("🔍 Google user: " + googleUser);
 
-            User existingUser = userDAO.findByGoogleId(googleUser.getGoogleId());
+            if (googleUser == null || googleUser.getGoogleId() == null) return null;
+
+            UserDAO userDAO = new UserDAO(conn);
+
+            // Tìm theo google_id
+            User existingUser = UserDAO.findByGoogleId(googleUser.getGoogleId(), conn);
 
             if (existingUser == null) {
-                User emailUser = userDAO.findByEmail(googleUser.getEmail());
+                // Nếu đã có user theo email -> update googleId
+                User emailUser = userDAO.getUserByEmail(googleUser.getEmail());
                 if (emailUser != null) {
                     emailUser.setGoogleId(googleUser.getGoogleId());
-                    UserDAO.updateGoogleId(emailUser);
+                    UserDAO.updateGoogleId(emailUser, conn);
                     return emailUser;
                 } else {
-
-                    UserDAO.insertGoogleUser(googleUser);
-                    return UserDAO.findByGoogleId(googleUser.getGoogleId());
+                    // Tạo mới user google
+                    UserDAO.insertGoogleUser(googleUser, conn);
+                    return UserDAO.findByGoogleId(googleUser.getGoogleId(), conn);
                 }
             }
 
@@ -96,8 +100,7 @@ public class GoogleUtils {
         user.setGoogleId(json.optString("id", null));
         user.setEmail(json.optString("email", null));
         user.setFullName(json.optString("name", null));
+        user.setImage(json.optString("picture", null)); // nếu muốn lưu avatar
         return user;
     }
-
-
 }

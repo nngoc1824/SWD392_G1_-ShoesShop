@@ -40,9 +40,10 @@ public class GoogleLoginController extends HttpServlet {
             User existingUser = userDAO.getUserByEmail(user.getEmail());
             if (existingUser == null) {
                 // Nếu chưa có thì thêm user mới
-                userDAO.insertGoogleUser(user);
+                UserDAO.insertGoogleUser(user, conn);
                 existingUser = userDAO.getUserByEmail(user.getEmail());
             }
+
 
             // Đặt user vào session
             HttpSession session = req.getSession();

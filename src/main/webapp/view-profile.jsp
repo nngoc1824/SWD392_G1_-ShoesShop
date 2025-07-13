@@ -6,6 +6,11 @@
     response.sendRedirect("login.jsp");
     return;
   }
+
+  String addr = (String) session.getAttribute("ghn_address");
+  String province = (String) session.getAttribute("ghn_province");
+  String district = (String) session.getAttribute("ghn_district");
+  String ward = (String) session.getAttribute("ghn_ward");
 %>
 
 <!DOCTYPE html>
@@ -90,9 +95,10 @@
     <p><strong>Tên đăng nhập:</strong> <%= user.getUserName() %></p>
     <p><strong>Trạng thái:</strong> <%= user.getStatus() == 1 ? "Hoạt động" : "Bị khóa" %></p>
     <p><strong>Mật khẩu:</strong> •••••••••</p>
+
+    <p><strong>Địa chỉ:</strong> <span id="fullAddress">Đang tải...</span></p>
+
     <a href="change-password.jsp" class="btn" style="background-color: #28a745;">🔐 Đổi mật khẩu</a>
-
-
   </div>
 
   <div class="btn-group">
@@ -100,6 +106,50 @@
     <a href="dashboard.jsp" class="btn" style="background-color: #6c757d;">← Quay về Dashboard</a>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const addr = "<%= addr == null ? "" : addr %>";
+    const provinceId = "<%= province == null ? "" : province %>";
+    const districtId = "<%= district == null ? "" : district %>";
+    const wardCode = "<%= ward == null ? "" : ward %>";
+
+    const addressSpan = document.getElementById("fullAddress");
+
+    if (!provinceId || !districtId || !wardCode) {
+      addressSpan.innerText = addr ? addr : "Chưa cập nhật";
+      return;
+    }
+
+    let provinceName = "", districtName = "", wardName = "";
+
+    fetch("address?action=province")
+            .then(res => res.json())
+            .then(data => {
+              const p = data.data.find(x => x.ProvinceID == provinceId);
+              provinceName = p ? p.ProvinceName : "";
+              return fetch("address?action=district&provinceId=" + provinceId);
+            })
+            .then(res => res.json())
+            .then(data => {
+              const d = data.data.find(x => x.DistrictID == districtId);
+              districtName = d ? d.DistrictName : "";
+              return fetch("address?action=ward&districtId=" + districtId);
+            })
+            .then(res => res.json())
+            .then(data => {
+              const w = data.data.find(x => x.WardCode == wardCode);
+              wardName = w ? w.WardName : "";
+
+              const parts = [addr, wardName, districtName, provinceName].filter(Boolean);
+              addressSpan.innerText = parts.length > 0 ? parts.join(", ") : "Chưa cập nhật";
+            })
+            .catch(err => {
+              console.error("Lỗi GHN:", err);
+              addressSpan.innerText = "(Không thể tải địa chỉ)";
+            });
+  });
+</script>
 
 </body>
 </html>
