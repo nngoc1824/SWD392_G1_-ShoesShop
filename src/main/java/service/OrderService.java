@@ -1,35 +1,32 @@
 package service;
 
-
+import dao.OrderDAO;
 import entites.Order;
-import entites.PaymentStatus;
-import org.springframework.stereotype.Service;
-import repository.OrderRepository;
 
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
 
-@Service
 public class OrderService {
+    private final OrderDAO orderDAO;
 
-    private OrderRepository orderRepository;
-
-    public OrderService(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
-    }
-    
-
-    public Order findByOrderId(Integer orderCode) {
-        return orderRepository.findByOrderId(orderCode);
+    public OrderService(Connection conn) {
+        this.orderDAO = new OrderDAO(conn);
     }
 
-    public boolean updateOrderStatus(long orderCode, PaymentStatus newStatus) {
-        Optional<Order> optionalOrder = orderRepository.findByOrderCode(orderCode);
-        if (optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            order.setPaymentStatus(newStatus);
-            orderRepository.save(order);
-            return true;
-        }
-        return false;
+    // Lưu đơn hàng mới và trả về orderId
+    public int save(Order order) throws SQLException {
+        return orderDAO.create(order);
+    }
+
+    // Lấy thông tin đơn hàng theo ID
+    public Optional<Order> findById(int orderId) throws SQLException {
+        return orderDAO.findById(orderId);
+    }
+
+    // Cập nhật trạng thái thanh toán
+    public void updateStatus(long orderId, boolean status, String paymentStatus) throws SQLException {
+        orderDAO.updateStatus((int) orderId, status, paymentStatus);
     }
 }

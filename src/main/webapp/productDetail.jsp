@@ -84,7 +84,7 @@
                 <!-- Submit -->
                 <div class="text-center">
                     <button type="submit" class="btn btn-primary">
-                        <i class="icon-shopping-cart"></i> Thêm vào giỏ hàng
+                        <i class="icon-shopping-cart"></i> Add to cart
                     </button>
                 </div>
             </form>

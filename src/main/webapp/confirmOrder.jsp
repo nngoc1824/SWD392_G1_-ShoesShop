@@ -21,14 +21,14 @@
 </head>
 <body>
 <%@ include file="header.jsp" %>
-<div class="colorlib-loader"></div>
+<div class=""></div>
 <div id="page">
 
     <div class="breadcrumbs">
         <div class="container">
             <div class="row">
                 <div class="col">
-                    <p class="bread"><span><a href="home.jsp">Home</a></span> / <span>Confirm Order</span></p>
+                    <p class="bread"><span><a href="home">Home</a></span> / <span>Confirm Order</span></p>
                 </div>
             </div>
         </div>
@@ -156,22 +156,13 @@
 </div>
 
 <!-- Scripts -->
-<script src="js/jquery.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.easing.1.3.js"></script>
-<script src="js/jquery.waypoints.min.js"></script>
-<script src="js/jquery.flexslider-min.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/bootstrap-datepicker.js"></script>
-<script src="js/jquery.stellar.min.js"></script>
-<script src="js/main.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+     document.addEventListener("DOMContentLoaded", function () {
         // Load provinces
-        fetch("getProvinces")
-            .then(res => res.json())
+         fetch("address?action=province")
+                 .then(res => res.json())
             .then(data => {
                 const provinceSelect = document.getElementById("province");
                 data.data.forEach(p => {
@@ -183,53 +174,79 @@
             });
 
         // On province change → load districts
-        document.getElementById("province").addEventListener("change", function () {
-            const provinceId = this.value;
-            const districtSelect = document.getElementById("district");
-            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-            document.getElementById("ward").innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-            document.getElementById("ward").disabled = true;
+         // Khi chọn Tỉnh → gọi getDistricts
+         document.getElementById("province").addEventListener("change", function () {
+             const provinceId = this.value;
+             const districtSelect = document.getElementById("district");
+             const wardSelect = document.getElementById("ward");
 
-            if (provinceId) {
-                fetch("getDistricts?provinceId=" + provinceId)
-                    .then(res => res.json())
-                    .then(data => {
-                        data.data.forEach(d => {
-                            const opt = document.createElement("option");
-                            opt.value = d.DistrictID;
-                            opt.textContent = d.DistrictName;
-                            districtSelect.appendChild(opt);
-                        });
-                        districtSelect.disabled = false;
-                    });
-            } else {
-                districtSelect.disabled = true;
-            }
-        });
+             districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+             wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+             wardSelect.disabled = true;
 
-        // On district change → load wards
-        document.getElementById("district").addEventListener("change", function () {
-            const districtId = this.value;
-            const wardSelect = document.getElementById("ward");
-            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+             if (provinceId) {
+                 fetch("address?action=district&provinceId=" + provinceId)
 
-            if (districtId) {
-                fetch("getWards?districtId=" + districtId)
-                    .then(res => res.json())
-                    .then(data => {
-                        data.data.forEach(w => {
-                            const opt = document.createElement("option");
-                            opt.value = w.WardCode;
-                            opt.textContent = w.WardName;
-                            wardSelect.appendChild(opt);
-                        });
-                        wardSelect.disabled = false;
-                    });
-            } else {
-                wardSelect.disabled = true;
-            }
-        });
-    });
+                         .then(async res => {
+                         if (!res.ok) {
+                             const errText = await res.text();
+                             throw new Error("Lỗi server khi tải quận/huyện: " + errText);
+                         }
+                         return res.json();
+                     })
+                     .then(data => {
+                         data.data.forEach(d => {
+                             const opt = document.createElement("option");
+                             opt.value = d.DistrictID;
+                             opt.textContent = d.DistrictName;
+                             districtSelect.appendChild(opt);
+                         });
+                         districtSelect.disabled = false;
+                     })
+                     .catch(err => {
+                         console.error(err);
+                         alert("Không thể tải danh sách Quận/Huyện. Vui lòng thử lại.");
+                     });
+             } else {
+                 districtSelect.disabled = true;
+             }
+         });
+
+// Khi chọn Quận → gọi getWards
+         document.getElementById("district").addEventListener("change", function () {
+             const districtId = this.value;
+             const wardSelect = document.getElementById("ward");
+
+             wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+             if (districtId) {
+                 fetch("address?action=ward&districtId=" + districtId)
+                         .then(async res => {
+                         if (!res.ok) {
+                             const errText = await res.text();
+                             throw new Error("Lỗi server khi tải phường/xã: " + errText);
+                         }
+                         return res.json();
+                     })
+                     .then(data => {
+                         data.data.forEach(w => {
+                             const opt = document.createElement("option");
+                             opt.value = w.WardCode;
+                             opt.textContent = w.WardName;
+                             wardSelect.appendChild(opt);
+                         });
+                         wardSelect.disabled = false;
+                     })
+                     .catch(err => {
+                         console.error(err);
+                         alert("Không thể tải danh sách Phường/Xã. Vui lòng thử lại.");
+                     });
+             } else {
+                 wardSelect.disabled = true;
+             }
+         });
+
+     });
 </script>
 
 </body>
