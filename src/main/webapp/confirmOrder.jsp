@@ -1,176 +1,139 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE HTML>
+<%@ page import="java.util.List" %>
+<%@ page import="entites.CartItem" %>
+<%@ page import="entites.Product" %>
+<%@ page import="service.ProductService" %>
+<!DOCTYPE html>
 <html>
 <head>
-    <title>Confirm Order - Footwear Shop</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Rokkitt:100,300,400,700" rel="stylesheet">
-    <link rel="stylesheet" href="css/animate.css">
-    <link rel="stylesheet" href="css/icomoon.css">
-    <link rel="stylesheet" href="css/ionicons.min.css">
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/magnific-popup.css">
-    <link rel="stylesheet" href="css/flexslider.css">
-    <link rel="stylesheet" href="css/owl.carousel.min.css">
-    <link rel="stylesheet" href="css/owl.theme.default.min.css">
-    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
-    <link rel="stylesheet" href="fonts/flaticon/font/flaticon.css">
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Confirm Order</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
 <%@ include file="header.jsp" %>
-<div class="colorlib-loader"></div>
-<div id="page">
+<div class="container my-5">
+    <div class="row">
+        <!-- Left Side: Cart + Customer Info -->
+        <div class="col-md-8">
+            <h4 class="mb-4">Your Order</h4>
+            <%
+                List<CartItem> cart = (List<CartItem>) request.getAttribute("cart");
+                ProductService productService = new ProductService();
+                int subtotal = 0;
+                if (cart != null && !cart.isEmpty()) {
+                    for (CartItem item : cart) {
+                        int quantity = item.getQuantity();
+                        Product p = productService.getProductById(item.getProductId());
+                        double price = p.getPrice();
+                        double itemTotal = price * quantity;
+                        subtotal += itemTotal;
+            %>
+            <div class="d-flex justify-content-between border-bottom py-2">
 
-    <div class="breadcrumbs">
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <p class="bread"><span><a href="home.jsp">Home</a></span> / <span>Confirm Order</span></p>
+                <div>
+                    <img src="<%= p.getImage() %>" alt="Product Image" style="width: 80px; height: 80px; object-fit: cover;">
+
+                    <strong><%= p.getProductName() %></strong><br>
+
                 </div>
+                <div> x<%= quantity %></div>
+                <div>$<%= itemTotal %></div>
+            </div>
+            <%
+                }
+            } else {
+            %>
+            <p>No items in cart.</p>
+            <%
+                }
+                int shippingFee = request.getAttribute("shippingFee") != null ? (Integer) request.getAttribute("shippingFee") : 0;
+                int total = subtotal + shippingFee;
+            %>
+
+            <hr class="my-4">
+
+            <h5>Customer Information</h5>
+            <form action="placeOrder" method="post">
+                <div class="form-group">
+                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                </div>
+
+                <h5>Shipping Address</h5>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <input type="text" name="firstName" class="form-control" placeholder="First Name" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <input type="text" name="lastName" class="form-control" placeholder="Last Name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="company" class="form-control" placeholder="Company (optional)">
+                </div>
+                <div class="form-group">
+                    <input type="text" name="address" class="form-control" placeholder="Address" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <select id="province" name="province" class="form-control" required>
+                            <option value="">Province</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <select id="district" name="district" class="form-control" disabled required>
+                            <option value="">District</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <select id="ward" name="ward" class="form-control" disabled required>
+                            <option value="">Commune</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="btn btn-primary">Checkout</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Side: Summary -->
+        <div class="col-md-4">
+            <div class="border p-3">
+                <h5>Summary (<%= (cart != null) ? cart.size() : 0 %> item)</h5>
+                <hr>
+                <p class="d-flex justify-content-between">
+                    <span>Subtotal</span><span>$<%= subtotal %></span>
+                </p>
+                <p class="d-flex justify-content-between">
+                    <span>Shipping</span><span><%= shippingFee > 0 ? "$" + shippingFee : "-" %></span>
+                </p>
+                <p class="d-flex justify-content-between">
+                    <span>Estimated Delivery</span><span>3–5 days</span>
+                </p>
+                <div class="form-group">
+                    <label>Gift card or discount code</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <p class="d-flex justify-content-between font-weight-bold">
+                    <span>Total</span><span>$<%= total %></span>
+                </p>
             </div>
         </div>
     </div>
-
-    <div class="colorlib-product">
-        <div class="container">
-            <div class="row row-pb-lg">
-                <div class="col-sm-10 offset-md-1">
-                    <div class="process-wrap">
-                        <div class="process text-center active">
-                            <p><span>01</span></p>
-                            <h3>Shopping Cart</h3>
-                        </div>
-                        <div class="process text-center active">
-                            <p><span>02</span></p>
-                            <h3>Checkout</h3>
-                        </div>
-                        <div class="process text-center active">
-                            <p><span>03</span></p>
-                            <h3>Confirm Order</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <!-- Billing Info -->
-                <div class="col-lg-8">
-                    <form method="post" action="placeOrder" class="colorlib-form">
-                        <h2>Billing Details</h2>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="fname">First Name</label>
-                                    <input type="text" id="fname" name="firstName" class="form-control" placeholder="Your first name">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="lname">Last Name</label>
-                                    <input type="text" id="lname" name="lastName" class="form-control" placeholder="Your last name">
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="email">Email</label>
-                                    <input type="email" id="email" name="email" class="form-control" placeholder="example@email.com">
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="phone">Phone Number</label>
-                                    <input type="text" id="phone" name="phone" class="form-control" placeholder="Your phone number">
-                                </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="address">Address</label>
-                                    <input type="text" id="address" name="address" class="form-control" placeholder="Street name, house number...">
-                                </div>
-                            </div>
-
-                            <!-- Province -->
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="province">Province/City (Tỉnh/Thành phố)</label>
-                                    <select id="province" name="province" class="form-control" required>
-                                        <option value="">-- Select Province --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- District -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="district">District (Quận/Huyện)</label>
-                                    <select id="district" name="district" class="form-control" disabled required>
-                                        <option value="">-- Select District --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Ward -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="ward">Ward/Commune (Xã/Phường)</label>
-                                    <select id="ward" name="ward" class="form-control" disabled required>
-                                        <option value="">-- Select Ward --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Order Summary -->
-                <div class="col-lg-4">
-                    <div class="cart-detail">
-                        <h2>Order Summary</h2>
-                        <ul>
-                            <li><span>Subtotal</span> <span>$100.00</span></li>
-                            <li><span>Shipping</span> <span>$0.00</span></li>
-                            <li><span>Order Total</span> <span>$100.00</span></li>
-                        </ul>
-                    </div>
-                    <div class="text-center mt-3">
-                        <form action="placeOrder" method="post">
-                            <button type="submit" class="btn btn-primary">Place Order</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<div class="gototop js-top">
-    <a href="#" class="js-gotop"><i class="ion-ios-arrow-up"></i></a>
-</div>
-
-<!-- Scripts -->
-<script src="js/jquery.min.js"></script>
-<script src="js/popper.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/jquery.easing.1.3.js"></script>
-<script src="js/jquery.waypoints.min.js"></script>
-<script src="js/jquery.flexslider-min.js"></script>
-<script src="js/owl.carousel.min.js"></script>
-<script src="js/jquery.magnific-popup.min.js"></script>
-<script src="js/bootstrap-datepicker.js"></script>
-<script src="js/jquery.stellar.min.js"></script>
-<script src="js/main.js"></script>
 <script>
+    // Load Province
     document.addEventListener("DOMContentLoaded", function () {
-        // Load provinces
-        fetch("getProvinces")
+        fetch("address?action=province")
             .then(res => res.json())
             .then(data => {
                 const provinceSelect = document.getElementById("province");
@@ -182,16 +145,17 @@
                 });
             });
 
-        // On province change → load districts
         document.getElementById("province").addEventListener("change", function () {
             const provinceId = this.value;
             const districtSelect = document.getElementById("district");
-            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
-            document.getElementById("ward").innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
-            document.getElementById("ward").disabled = true;
+            const wardSelect = document.getElementById("ward");
+
+            districtSelect.innerHTML = '<option value="">District</option>';
+            wardSelect.innerHTML = '<option value="">Commune</option>';
+            wardSelect.disabled = true;
 
             if (provinceId) {
-                fetch("getDistricts?provinceId=" + provinceId)
+                fetch("address?action=district&provinceId=" + provinceId)
                     .then(res => res.json())
                     .then(data => {
                         data.data.forEach(d => {
@@ -207,14 +171,14 @@
             }
         });
 
-        // On district change → load wards
         document.getElementById("district").addEventListener("change", function () {
             const districtId = this.value;
             const wardSelect = document.getElementById("ward");
-            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+
+            wardSelect.innerHTML = '<option value="">Commune</option>';
 
             if (districtId) {
-                fetch("getWards?districtId=" + districtId)
+                fetch("address?action=ward&districtId=" + districtId)
                     .then(res => res.json())
                     .then(data => {
                         data.data.forEach(w => {
@@ -231,6 +195,5 @@
         });
     });
 </script>
-
 </body>
 </html>

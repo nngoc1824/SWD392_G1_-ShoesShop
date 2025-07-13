@@ -61,7 +61,8 @@ public class CartController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        HttpSession session = request.getSession();
+        Object user = session.getAttribute("user");
         String action = request.getParameter("action");
         int productId = Integer.parseInt(request.getParameter("productId"));
 
