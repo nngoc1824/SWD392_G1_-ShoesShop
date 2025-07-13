@@ -1,21 +1,16 @@
 package utils;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBContext {
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String url = "jdbc:mysql://localhost:3306/OSS_Final?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         String user = "root";
-
-        String password = "1234";
-
-
+        String password = "123";
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(url, user, password);
     }
-
     public static void main(String[] args) {
         try {
             DBContext db = new DBContext();

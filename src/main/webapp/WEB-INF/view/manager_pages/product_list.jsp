@@ -4,10 +4,10 @@
 <html>
 <head>
     <title>Product List</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/common/sidebar.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/common/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/product_list.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/manager_pages/table_product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/sidebar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/product_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/table_product.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
@@ -93,8 +93,8 @@
                         <select name="category" class="form-select w-25 me-2">
                             <option value="0">All Categories</option>
                             <c:forEach var="category" items="${categories}">
-                                <option ${categoryCrr == category.categoryId ? "selected" : ""}
-                                        value="${category.categoryId}">${category.categoryName}</option>
+                                <option ${categoryCrr == category.settingId ? "selected" : ""}
+                                        value="${category.settingId}">${category.settingName}</option>
                             </c:forEach>
                         </select>
                         <select name="status" class="form-select w-25 me-2">
@@ -104,7 +104,8 @@
                         </select>
 
                         <input type="search" class="form-control w-5" placeholder="Enter keyword to search...">
-                        <button class="btn btn-primary ms-2" onclick="window.location.href='add-product'">Add</button>
+                        <button class="btn btn-primary ms-2" onclick="window.location.href='?action=add-product'">Add
+                        </button>
                     </div>
                     <div class="table-main-content">
                         <table class="table table-hover table-bordered text-center">
@@ -143,8 +144,8 @@
                                     <td>${product.price}</td>
                                     <td>
                                         <c:forEach var="category" items="${categories}">
-                                            <c:if test="${category.categoryId == product.categoryId}">
-                                                ${category.categoryName}
+                                            <c:if test="${category.settingId == product.categoryId}">
+                                                ${category.settingName}
                                             </c:if>
                                         </c:forEach>
                                     </td>
@@ -152,13 +153,14 @@
                                     <td>${product.stock}</td>
                                         ${product.status == 1 ? '<td class= "text-success">In stock</td>' : '<td class="text-danger">Out of stock</td>'}
                                     <td>
-                                        <a href="update-product?id=${product.productId}" class="btn btn-warning btn-sm ">Edit</a>
+                                        <a href="?action=update-product&id=${product.productId}"
+                                           class="btn btn-warning btn-sm ">Edit</a>
                                         <c:if test="${product.status == 1}">
-                                            <a href="disable-product?id=${product.productId}"
+                                            <a href="?action=disable-product&id=${product.productId}"
                                                class="btn btn-danger btn-sm ms-3">Disable</a>
                                         </c:if>
                                         <c:if test="${product.status == 0}">
-                                            <a href="enable-product?id=${product.productId}"
+                                            <a href="?action=enable-product&id=${product.productId}"
                                                class="btn btn-success btn-sm ms-3">Enable</a>
                                         </c:if>
                                     </td>
@@ -168,16 +170,16 @@
                         </table>
                         <ul class="pagination">
                             <li class="page-item  ${currentPage == 1 ? "disabled" : ""}"><a
-                                    href="product?pageNo=${currentPage - 1}&category=${categoryCrr}&status=${statusCrr}"
+                                    href="product?pageNo=${currentPage - 1}&category=${categoryCrr}&status=${statusCrr}&search=${search}"
                                     class="page-link">Previous</a></li>
                             <c:forEach var="page" begin="1" end="${pageCount}">
                                 <li class="page-item  ${currentPage == page ? "active" : ""}"><a a
-                                                                                                 href="product?pageNo=${page}&category=${categoryCrr}&status=${statusCrr}"
+                                                                                                 href="product?pageNo=${page}&category=${categoryCrr}&status=${statusCrr}&search=${search}"
                                                                                                  class="page-link">${page}</a>
                                 </li>
                             </c:forEach>
                             <li class="page-item  ${currentPage == pageCount ? "disabled" : ""}"><a
-                                    href="product?pageNo=${currentPage + 1}&category=${categoryCrr}&status=${statusCrr}"
+                                    href="product?pageNo=${currentPage + 1}&category=${categoryCrr}&status=${statusCrr}&search=${search}"
                                     class="page-link">Next</a></li>
                         </ul>
                     </div>
@@ -194,13 +196,13 @@
         let category = filterCategory.value
         console.log(category)
 
-        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&category=" + category + "&status=${statusCrr}";
+        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&category=" + category + "&status=${statusCrr}&search=${search}";
     })
     const filterStatus = document.querySelector("select[name='status']")
     filterStatus.addEventListener("change", (e) => {
         let status = filterStatus.value
         console.log(status)
-        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&status=" + status + "&category=${categoryCrr}";
+        window.location.href = "http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&status=" + status + "&category=${categoryCrr}&search=${search}";
     })
 
 </script>
@@ -212,8 +214,17 @@
         sidebar.classList.toggle('sidebar-collapsed');
     });
 </script>
-
-
+<script>
+    const searchInput = document.querySelector("input[type='search']")
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const search = searchInput.value.trim();
+            const url = `http://localhost:8080/SWD392_ShoesShop_war_exploded/product?pageNo=${currentPage}&search=\${search}&category=${categoryCrr}&status=${statusCrr}`;
+            window.location.href = url;
+        }
+    })
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
