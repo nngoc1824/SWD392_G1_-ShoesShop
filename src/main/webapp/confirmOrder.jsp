@@ -28,7 +28,7 @@
         <div class="container">
             <div class="row">
                 <div class="col">
-                    <p class="bread"><span><a href="home.jsp">Home</a></span> / <span>Confirm Order</span></p>
+                    <p class="bread"><span><a href="home">Home</a></span> / <span>Confirm Order</span></p>
                 </div>
             </div>
         </div>
@@ -161,8 +161,8 @@
 <script>
      document.addEventListener("DOMContentLoaded", function () {
         // Load provinces
-        fetch("getProvinces")
-            .then(res => res.json())
+         fetch("address?action=province")
+                 .then(res => res.json())
             .then(data => {
                 const provinceSelect = document.getElementById("province");
                 data.data.forEach(p => {
@@ -185,8 +185,9 @@
              wardSelect.disabled = true;
 
              if (provinceId) {
-                 fetch("getDistricts?provinceId=" + provinceId)
-                     .then(async res => {
+                 fetch("address?action=district&provinceId=" + provinceId)
+
+                         .then(async res => {
                          if (!res.ok) {
                              const errText = await res.text();
                              throw new Error("Lỗi server khi tải quận/huyện: " + errText);
@@ -219,8 +220,8 @@
              wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
 
              if (districtId) {
-                 fetch("getWards?districtId=" + districtId)
-                     .then(async res => {
+                 fetch("address?action=ward&districtId=" + districtId)
+                         .then(async res => {
                          if (!res.ok) {
                              const errText = await res.text();
                              throw new Error("Lỗi server khi tải phường/xã: " + errText);
