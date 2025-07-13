@@ -59,7 +59,7 @@
 
     <div class="text-right">
         <h4>Total: $<%= String.format("%.2f", total) %></h4>
-        <a href="confirmOrder.jsp" class="btn btn-success mt-2">Proceed to Checkout</a>
+        <a href="confirmOrder" class="btn btn-success mt-2">Confirm Order</a>
     </div>
     <% } %>
 </div>
