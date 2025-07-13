@@ -58,7 +58,7 @@
             <div class="row">
                 <!-- Billing Info -->
                 <div class="col-lg-8">
-                    <form method="post" action="placeOrder" class="colorlib-form">
+                    <form method="post" action="/checkout/create" class="colorlib-form">
                         <h2>Billing Details</h2>
                         <div class="row">
                             <div class="col-md-6">
@@ -125,6 +125,9 @@
                                 </div>
                             </div>
 
+                        </div>
+                        <div class="col-md-12 text-right">
+                            <button type="submit" class="btn btn-primary">Thanh toán</button>
                         </div>
                     </form>
                 </div>
