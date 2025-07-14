@@ -1,8 +1,9 @@
-package utils;
+package proxy;
 
 import entites.User;
 import dao.UserDAO;
 import org.json.JSONObject;
+import utils.DBContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;

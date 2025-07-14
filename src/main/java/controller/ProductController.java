@@ -1,6 +1,5 @@
 package controller;
 
-import dao.ProductDAO;
 import entites.Product;
 import entites.Setting;
 import jakarta.servlet.ServletException;
@@ -14,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import service.ProductService;
 import service.SettingService;
-import utils.CloudinaryConfig;
+import proxy.CloudinaryConfig;
 import utils.ValidateProduct;
 
 import java.io.IOException;

@@ -2,9 +2,8 @@ package controller;
 
 import dao.UserDAO;
 import entites.User;
-import entites.Address;
 import jakarta.servlet.annotation.MultipartConfig;
-import utils.CloudinaryConfig;
+import proxy.CloudinaryConfig;
 import utils.DBContext;
 import utils.EmailValidate;
 import jakarta.servlet.*;

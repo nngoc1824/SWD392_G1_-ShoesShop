@@ -1,4 +1,4 @@
-package utils;
+package proxy;
 // Import the required packages
 
 import com.cloudinary.*;
