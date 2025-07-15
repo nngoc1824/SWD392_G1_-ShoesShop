@@ -41,7 +41,7 @@ public class UserController extends HttpServlet {
                     showUpdateProfileForm(request, response);
                     break;
                 default:
-                    response.sendRedirect("WEB-INF/login.jsp");
+                    request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public class UserController extends HttpServlet {
                     handleChangePassword(request, response, userDAO);
                     break;
                 default:
-                    response.sendRedirect("WEB-INF/login.jsp");
+                    request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
@@ -201,7 +201,7 @@ public class UserController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect("WEB-INF/login.jsp");
+           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
 
@@ -246,7 +246,7 @@ public class UserController extends HttpServlet {
         User sessionUser = (User) session.getAttribute("user");
         Part imagePart = request.getPart("image");
         if (sessionUser == null) {
-            response.sendRedirect("WEB-INF/login.jsp");
+           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
         String imageUrl = "";
@@ -294,7 +294,7 @@ public class UserController extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            response.sendRedirect("WEB-INF/login.jsp");
+           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
 

@@ -1,3 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="entites.User" %>
 <%
@@ -102,10 +104,18 @@
   </div>
 
   <div class="btn-group">
-    <a href="user?action=updateProfile" class="btn">✏️ Cập nhật hồ sơ</a>
+    <a href="user?action=showUpdateProfileForm" class="btn">✏️ Cập nhật hồ sơ</a>
   </div>
   <div class="btn-group">
-    <a href="home" class="btn">To HomePage</a>
+    <c:choose>
+      <c:when test="${fn:contains(sessionScope.user.roles, 'Manager')}">
+        <a href="product" class="btn" style="background-color: #ffc107;">⚙️ Quản lý Admin</a>
+      </c:when>
+      <c:otherwise>
+        <a href="home" class="btn">To HomePage</a>
+      </c:otherwise>
+    </c:choose>
+
   </div>
 </div>
 
