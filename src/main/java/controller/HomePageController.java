@@ -33,7 +33,7 @@ public class HomePageController extends HttpServlet {
         request.setAttribute("cartSize", cartSize);
 
         // Điều hướng sang trang JSP
-        request.getRequestDispatcher("homepage.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/homepage.jsp").forward(request, response);
     }
 
     @Override
