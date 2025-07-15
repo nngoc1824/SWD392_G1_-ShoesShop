@@ -1,8 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="entites.Product, entites.Size, java.util.List" %>
+<%@ page import="entites.Product, java.util.List" %>
 <%
     Product product = (Product) request.getAttribute("product");
-    List<Size> sizeList = (List<Size>) request.getAttribute("sizeList");
+//    List<Size> sizeList = (List<Size>) request.getAttribute("sizeList");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,7 +14,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
 
@@ -54,17 +54,17 @@
             <form action="cart" method="post" class="col-md-4" >
                 <input type="hidden" name="productId" value="<%= product.getProductId() %>"/>
 
-                <!-- Size -->
-                <div class="form-group">
-                    <label>Chọn size</label>
-                    <select name="sizeId" class="form-control" required>
-                        <option value="">-- Chọn size --</option>
-                        <% if (sizeList != null) {
-                            for (Size s : sizeList) { %>
-                        <option value="<%= s.getSizeId() %>"><%= s.getSizeNumber() %></option>
-                        <% } } %>
-                    </select>
-                </div>
+<%--                <!-- Size -->--%>
+<%--                <div class="form-group">--%>
+<%--                    <label>Chọn size</label>--%>
+<%--                    <select name="sizeId" class="form-control" required>--%>
+<%--                        <option value="">-- Chọn size --</option>--%>
+<%--                        <% if (sizeList != null) {--%>
+<%--                            for (Size s : sizeList) { %>--%>
+<%--                        <option value="<%= s.getSizeId() %>"><%= s.getSizeNumber() %></option>--%>
+<%--                        <% } } %>--%>
+<%--                    </select>--%>
+<%--                </div>--%>
 
                 <!-- Quantity -->
                 <div class="input-group mb-3">

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-<%@ include file="header.jsp" %>
+<%@ include file="../header.jsp" %>
 <div class="container mt-5">
     <h3 class="mb-4">Your Shopping Cart</h3>
 
@@ -59,7 +59,7 @@
 
     <div class="text-right">
         <h4>Total: $<%= String.format("%.2f", total) %></h4>
-        <a href="confirmOrder.jsp" class="btn btn-success mt-2">Proceed to Checkout</a>
+        <a href="confirmOrder" class="btn btn-success mt-2">Confirm Order</a>
     </div>
     <% } %>
 </div>

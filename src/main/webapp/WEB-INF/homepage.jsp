@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
 
     <!-- Bootstrap only -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/style.css"> <!-- Optional custom CSS -->
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/style.css"> <!-- Optional custom CSS -->
 </head>
 
 <body>
@@ -32,13 +32,13 @@
     <div class="row text-center mb-5">
         <div class="col-md-6">
             <a href="category.jsp?gender=men">
-                <img src="images/men.jpg" alt="Men's Collection" class="img-fluid">
+                <img src="../images/men.jpg" alt="Men's Collection" class="img-fluid">
                 <h3>Shop Men's Collection</h3>
             </a>
         </div>
         <div class="col-md-6">
             <a href="category.jsp?gender=women">
-                <img src="images/women.jpg" alt="Women's Collection" class="img-fluid">
+                <img src="../images/women.jpg" alt="Women's Collection" class="img-fluid">
                 <h3>Shop Women's Collection</h3>
             </a>
         </div>

@@ -4,7 +4,7 @@ import dao.UserDAO;
 import entites.User;
 import jakarta.servlet.http.HttpSession;
 import utils.DBContext;
-import utils.GoogleUtils;
+import proxy.GoogleUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

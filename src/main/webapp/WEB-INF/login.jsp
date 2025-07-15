@@ -5,10 +5,10 @@
     <title>Login Page</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
 
     <!-- Optional custom CSS -->
-    <link rel="stylesheet" type="text/css" href="user_action/login.css">
+    <link rel="stylesheet" type="text/css" href="../user_action/login.css">
 
     <script>
         function togglePassword() {
