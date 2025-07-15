@@ -38,13 +38,10 @@
                 <div> x<%= quantity %></div>
                 <div>$<%= String.format("%.2f", itemTotal) %></div>
             </div>
-            <%
-                }
-            } else {
-            %>
+            <%  }
+            } else { %>
             <p>No items in cart.</p>
-            <%
-                }
+            <% }
                 int shippingFee = request.getAttribute("shippingFee") != null ? (Integer) request.getAttribute("shippingFee") : 0;
                 double total = subtotal + shippingFee;
             %>
@@ -90,6 +87,10 @@
                     </div>
                 </div>
 
+                <!-- Hidden shipping fee + total -->
+                <input type="hidden" id="shippingFeeInput" name="shippingFee" value="<%= shippingFee %>">
+                <input type="hidden" id="totalFeeInput" name="total" value="<%= String.format("%.2f", total) %>">
+
                 <div class="text-right">
                     <button type="submit" class="btn btn-primary">Checkout</button>
                 </div>
@@ -111,10 +112,10 @@
                 <p class="d-flex justify-content-between font-weight-bold">
                     <span>Total</span><span id="total-fee" data-subtotal="<%= subtotal %>">$<%= String.format("%.2f", total) %></span>
                 </p>
-
                 <p class="d-flex justify-content-between">
                     <span>Estimated Delivery</span><span>3–5 days</span>
                 </p>
+                <hr>
                 <div class="form-group">
                     <label>Gift card or discount code</label>
                     <div class="input-group">
@@ -134,11 +135,15 @@
 </div>
 
 <script>
-    // Load Province/District/Ward
     document.addEventListener("DOMContentLoaded", function () {
         const provinceSelect = document.getElementById("province");
         const districtSelect = document.getElementById("district");
         const wardSelect = document.getElementById("ward");
+
+        const shippingFeeInput = document.getElementById("shippingFeeInput");
+        const totalFeeInput = document.getElementById("totalFeeInput");
+        const shippingFeeSpan = document.getElementById("shipping-fee");
+        const totalFeeSpan = document.getElementById("total-fee");
 
         // Load Provinces
         fetch("confirmOrder?action=province")
@@ -152,12 +157,13 @@
                 });
             });
 
-        // Province change => load District
+        // Province change => load Districts
         provinceSelect.addEventListener("change", function () {
             const provinceId = this.value;
 
             districtSelect.innerHTML = '<option value="">District</option>';
             wardSelect.innerHTML = '<option value="">Commune</option>';
+            districtSelect.disabled = true;
             wardSelect.disabled = true;
 
             if (provinceId) {
@@ -172,16 +178,15 @@
                         });
                         districtSelect.disabled = false;
                     });
-            } else {
-                districtSelect.disabled = true;
             }
         });
 
-        // District change => load Ward
+        // District change => load Wards
         districtSelect.addEventListener("change", function () {
             const districtId = this.value;
 
             wardSelect.innerHTML = '<option value="">Commune</option>';
+            wardSelect.disabled = true;
 
             if (districtId) {
                 fetch("confirmOrder?action=ward&districtId=" + districtId)
@@ -195,34 +200,33 @@
                         });
                         wardSelect.disabled = false;
                     });
-            } else {
-                wardSelect.disabled = true;
             }
         });
-        // Sau khi load ward xong và người dùng chọn ward
-        wardSelect.addEventListener("change", function () {
-            const districtId = districtSelect.value;
-            const wardCode = this.value;
 
-            if (districtId && wardCode) {
-                // Gửi request để tính phí ship
-                fetch(`confirmOrder?action=shippingFee&districtId=${districtId}&wardCode=${wardCode}`)
+        // Ward change => calculate shipping fee
+        wardSelect.addEventListener("change", function () {
+            const districtIdChecked = districtSelect.value;
+            const wardCodeChecked = this.value;
+
+            if (districtIdChecked && wardCodeChecked) {
+                fetch(`confirmOrder?action=shippingFee&districtId=${districtIdChecked}&wardCode=${wardCodeChecked}`)
                     .then(res => res.json())
                     .then(data => {
-                        const shippingFee = data.fee;
-                        const shippingFeeElement = document.getElementById("shipping-fee");
-                        const totalElement = document.getElementById("total-fee");
-
-                        shippingFeeElement.textContent = `$${shippingFee}`;
-
-                        // Lấy subtotal từ attribute data
-                        const subtotal = parseFloat(totalElement.getAttribute("data-subtotal"));
+                        const shippingFee = data.total; // Giá trị trả về từ API
+                        const subtotal = parseFloat(totalFeeSpan.dataset.subtotal);
                         const total = subtotal + shippingFee;
-                        totalElement.textContent = `$${total.toFixed(2)}`;
-                    });
+
+                        // Cập nhật UI
+                        shippingFeeSpan.textContent = `$${shippingFee}`;
+                        totalFeeSpan.textContent = `$${total.toFixed(2)}`;
+
+                        // Cập nhật input ẩn
+                        shippingFeeInput.value = shippingFee;
+                        totalFeeInput.value = total.toFixed(2);
+                    })
+                    .catch(err => console.error("Shipping fee fetch error:", err));
             }
         });
-
     });
 </script>
 
