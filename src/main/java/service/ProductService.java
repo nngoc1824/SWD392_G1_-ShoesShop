@@ -20,10 +20,7 @@ public class ProductService {
         // This method should interact with the ProductDAO to fetch a product by its ID
         return productDAO.getProductById(productId);
     }
-    public List<Product> getProductPagination(int pageNo, int categoryId, int status, String searchQuery) {
-        // This method should interact with the ProductDAO to fetch products with pagination
-        return productDAO.getListProductPaginate(pageNo, categoryId, status,searchQuery );
-    }
+
     public int addProduct(Product product) {
 
         // This method should interact with the ProductDAO to add a new product
