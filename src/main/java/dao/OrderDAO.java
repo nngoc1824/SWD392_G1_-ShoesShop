@@ -1,6 +1,5 @@
 package dao;
 
-
 import entites.Order;
 
 import java.sql.*;
@@ -13,20 +12,25 @@ public class OrderDAO {
         this.conn = conn;
     }
 
-    // Tạo đơn hàng mới
+    // Tạo đơn hàng với ID tự truyền vào
     public int create(Order order) throws SQLException {
-        String sql = "INSERT INTO `Order` (total_price, order_date, status, ship_address, payment_status, user_id) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setDouble(1, order.getTotalPrice());
-            stmt.setTimestamp(2, new Timestamp(order.getOrderDate().getTime()));
-            stmt.setBoolean(3, order.isStatus());
-            stmt.setString(4, order.getShipAddress());
-            stmt.setString(5, order.getPaymentStatus());
-            stmt.setInt(6, order.getUserId());
+        String sql = "INSERT INTO `Order` (order_id, total_price, order_date, status, ship_address, payment_status, phone, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, order.getOrderId());
+            stmt.setDouble(2, order.getTotalPrice());
+            stmt.setDate(3, new java.sql.Date(order.getOrderDate().getTime()));
+            stmt.setBoolean(4, order.isStatus());
+            stmt.setString(5, order.getShipAddress());
+            stmt.setString(6, order.getPaymentStatus());
+            stmt.setString(7, order.getPhone());
+            if (order.getUserId() != 0) {
+                stmt.setInt(8, order.getUserId());
+            } else {
+                stmt.setNull(8, java.sql.Types.INTEGER);
+            }
 
-            stmt.executeUpdate();
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) return rs.getInt(1);
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return order.getOrderId();
         }
         return -1;
     }
@@ -90,6 +94,16 @@ public class OrderDAO {
         }
     }
 
+    // ✅ Cập nhật số điện thoại (nếu cần)
+    public boolean updatePhone(int orderId, String newPhone) throws SQLException {
+        String sql = "UPDATE `Order` SET phone = ? WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newPhone);
+            stmt.setInt(2, orderId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     // Xoá đơn hàng
     public boolean delete(int orderId) throws SQLException {
         String sql = "DELETE FROM `Order` WHERE order_id = ?";
@@ -104,10 +118,11 @@ public class OrderDAO {
         return Order.builder()
                 .orderId(rs.getInt("order_id"))
                 .totalPrice(rs.getDouble("total_price"))
-                .orderDate(rs.getTimestamp("order_date"))
+                .orderDate(rs.getDate("order_date")) // DATE
                 .status(rs.getBoolean("status"))
                 .shipAddress(rs.getString("ship_address"))
                 .paymentStatus(rs.getString("payment_status"))
+                .phone(rs.getString("phone")) // thêm phone
                 .userId(rs.getInt("user_id"))
                 .build();
     }

@@ -48,7 +48,7 @@
                 </div>
                 <div class="message-body">
                     <a class="dropdown-item p-2 h6 rounded-1" href="dashboard.jsp">Profile</a>
-                    <a class="dropdown-item p-2 h6 rounded-1" href="user?action=log-out">Logout</a>
+                    <a class="dropdown-item p-2 h6 rounded-1" href="user?action=logout">Logout</a>
                 </div>
             </div>
         </div>
