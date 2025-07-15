@@ -117,12 +117,24 @@ public class ProductController extends HttpServlet {
         req.setAttribute("pageCount", pageCount);
         req.setAttribute("search", search);
         req.setAttribute("productList", productList);
-        req.getRequestDispatcher("/WEB-INF/view/manager_pages/product_list.jsp").forward(req, resp);
+        if (req.getParameter("message") != null) {
+            req.setAttribute("message", req.getParameter("message"));
+        }
+        if (req.getParameter("error") != null) {
+            req.setAttribute("error", req.getParameter("error"));
+        }
+        req.getRequestDispatcher("/WEB-INF/manager_pages/product_list.jsp").forward(req, resp);
     }
 
     public void addProducts(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setAttribute("categories", settingService.getAllCategories());
-        req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
+        if (req.getParameter("err") != null) {
+            req.setAttribute("error", req.getParameter("err"));
+        }
+        if (req.getParameter("message") != null) {
+            req.setAttribute("message", req.getParameter("message"));
+        }
+        req.getRequestDispatcher("/WEB-INF/manager_pages/add_product.jsp").forward(req, resp);
     }
 
     public void updateProductDetails(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -137,7 +149,7 @@ public class ProductController extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid product ID format");
                 return;
             }
-            req.getRequestDispatcher("/WEB-INF/view/manager_pages/update_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/manager_pages/update_product.jsp").forward(req, resp);
         } else {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Product ID is required");
         }
@@ -151,9 +163,9 @@ public class ProductController extends HttpServlet {
             boolean isDisabled = productService.enableProduct(productId);
 
             if (isDisabled) {
-                resp.sendRedirect("product?message=Product disabled successfully");
+                resp.sendRedirect("product?message=Product enabled successfully");
             } else {
-                resp.sendRedirect("product?error=Failed to disable product");
+                resp.sendRedirect("product?error=Failed to enabled product");
             }
         } else {
             resp.sendRedirect("product?error=Invalid product ID");
@@ -247,14 +259,12 @@ public class ProductController extends HttpServlet {
         // Save the product to the database
         int isAdded = productService.addProduct(product);
         log.info("Add Product: " + isAdded);
-        if (isAdded != -1) {
+        if (isAdded > 0) {
             // Redirect to the product list page with success message
-            req.setAttribute("message", "Product added successfully!");
-            resp.sendRedirect(req.getContextPath() + "/product");
+            resp.sendRedirect("product?message=Product added successfully");
         } else {
             // Forward back to the add product page with error message
-            req.setAttribute("error", "Failed to add product. Please try again.");
-            req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
+            resp.sendRedirect("product?action=add-product&err=Failed to add product. Please try again.");
         }
     }
 
@@ -319,7 +329,7 @@ public class ProductController extends HttpServlet {
         } else {
             // Forward back to the add product page with error message
             req.setAttribute("error", "Failed to update product. Please try again.");
-            req.getRequestDispatcher("/WEB-INF/view/manager_pages/add_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/manager_pages/add_product.jsp").forward(req, resp);
         }
     }
 
