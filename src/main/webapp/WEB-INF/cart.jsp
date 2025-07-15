@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-<%@ include file="../header.jsp" %>
+<%@ include file="header.jsp" %>
 <div class="container mt-5">
     <h3 class="mb-4">Your Shopping Cart</h3>
 
@@ -40,15 +40,21 @@
         <tr>
             <td><img src="<%= product.getImage() %>" alt="image" width="80"></td>
             <td><%= product.getProductName() %></td>
-            <td>$<%= String.format("%.2f", product.getPrice()) %></td>
             <td>
-                <form method="post" action="cart">
+                <%= String.format("%,d", (long) product.getPrice()) %>₫
+            </td>
+            <td>
+                <form method="post" action="cart?action=update">
                     <input type="hidden" name="productId" value="<%= product.getProductId() %>">
                     <input type="number" name="quantity" value="<%= item.getQuantity() %>" min="1" class="form-control w-50 d-inline">
                     <button type="submit" class="btn btn-sm btn-primary ml-2">Update</button>
                 </form>
             </td>
-            <td>$<%= String.format("%.2f", subTotal) %></td>
+
+            <td>
+                <%= String.format("%,d", (long) subTotal) %>₫
+            </td>
+
             <td>
                 <a href="cart?action=remove&productId=<%= product.getProductId() %>" class="btn btn-danger btn-sm">Remove</a>
             </td>
@@ -58,7 +64,7 @@
     </table>
 
     <div class="text-right">
-        <h4>Total: $<%= String.format("%.2f", total) %></h4>
+        <h4>Total: <%= String.format("%,d", (long) total) %>₫ </h4>
         <a href="confirmOrder" class="btn btn-success mt-2">Confirm Order</a>
     </div>
     <% } %>

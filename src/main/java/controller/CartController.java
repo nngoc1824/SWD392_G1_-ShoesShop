@@ -25,6 +25,7 @@ public class CartController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         String action = request.getParameter("action");
         if ("remove".equals(action)) {
             handleRemove(request, response);
@@ -35,6 +36,7 @@ public class CartController extends HttpServlet {
 
     private void showCart(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
         Map<Integer, Integer> cartMap = getCartFromCookie(request);
 
         List<CartItem> cartItems = new ArrayList<>();
@@ -46,7 +48,7 @@ public class CartController extends HttpServlet {
             if (product != null) {
                 CartItem item = new CartItem();
                 item.setProductId(productId);
-                item.setProductId(product.getProductId());
+
                 item.setQuantity(quantity);
                 item.setPrice(product.getPrice() * quantity);
                 cartItems.add(item);
@@ -54,40 +56,50 @@ public class CartController extends HttpServlet {
         }
 
         request.setAttribute("cartItems", cartItems);
-        request.getRequestDispatcher("cart.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/cart.jsp").forward(request, response);
     }
 
-    // Thêm mới hoặc cập nhật số lượng
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        Object user = session.getAttribute("user");
+
         String action = request.getParameter("action");
         int productId = Integer.parseInt(request.getParameter("productId"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
 
         Map<Integer, Integer> cart = getCartFromCookie(request);
 
         if ("update".equals(action)) {
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-            if (quantity <= 0) cart.remove(productId);
-            else cart.put(productId, quantity);
-        } else {
-            int quantity = Integer.parseInt(request.getParameter("quantity"));
-            cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
-        }
+            if (quantity <= 0) {
+                cart.remove(productId);
+            } else {
+                cart.put(productId, quantity);
+            }
+            saveCartToCookie(response, cart);
+            response.sendRedirect("cart");
 
-        saveCartToCookie(response, cart);
-        response.sendRedirect("cart");
+        } else if ("add".equals(action)) {
+            cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
+            saveCartToCookie(response, cart);
+            response.sendRedirect("cart");
+
+        } else if ("buyNow".equals(action)) {
+            cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
+            saveCartToCookie(response, cart);
+            response.sendRedirect("checkout"); // Điều hướng sang trang thanh toán
+        } else {
+            // Mặc định: chỉ thêm nếu không có action
+            cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
+            saveCartToCookie(response, cart);
+            response.sendRedirect("cart");
+        }
     }
 
     private void handleRemove(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
         int productId = Integer.parseInt(request.getParameter("productId"));
-
         Map<Integer, Integer> cart = getCartFromCookie(request);
         cart.remove(productId);
-
         saveCartToCookie(response, cart);
         response.sendRedirect("cart");
     }
