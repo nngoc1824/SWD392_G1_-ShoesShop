@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.List;
 
 @MultipartConfig
 @WebServlet(name = "UserController", urlPatterns = {"/user"})
@@ -59,7 +60,7 @@ public class UserController extends HttpServlet {
                     break;
 
                 default:
-                    response.sendRedirect("login.jsp");
+                    response.sendRedirect("WEB-INF/login.jsp");
             }
 
         } catch (Exception e) {
@@ -84,9 +85,11 @@ public class UserController extends HttpServlet {
         User user = userDAO.login(username, password);
         if (user != null) {
             HttpSession session = request.getSession();
+            List<String> roles = userDAO.getRole(user.getUserId());
+            user.setRoles(roles);
             session.setAttribute("user", user);
 
-            if (userDAO.isManager(user.getUserId())) {
+            if (roles.contains("Manager")) {
                 response.sendRedirect("product"); // Nếu là manager thì chuyển đến product
             } else {
                 response.sendRedirect("home"); // Người dùng bình thường về home
