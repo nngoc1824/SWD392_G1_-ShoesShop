@@ -63,7 +63,7 @@
     <% } %>
 
     <div class="links">
-        <p><a href="register.jsp">Chưa có tài khoản? Đăng ký</a></p>
+        <p><a href="WEB-INF/register.jsp">Chưa có tài khoản? Đăng ký</a></p>
         <p><a href="home">Về trang chủ</a></p>
     </div>
 </div>

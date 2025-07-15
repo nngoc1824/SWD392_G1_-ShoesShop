@@ -102,7 +102,7 @@
 
   <!-- ✅ Các nút chức năng -->
   <div style="margin-top: 20px; text-align: center;">
-    <a href="view-profile.jsp"
+    <a href="WEB-INF/view-profile.jsp"
        style="display: inline-block;
               background-color: #4285f4;
               color: white;
@@ -116,7 +116,7 @@
   </div>
 
   <div class="buttons">
-    <a href="profile.jsp">Chỉnh sửa hồ sơ</a>
+    <a href="WEB-INF/profile.jsp">Chỉnh sửa hồ sơ</a>
     <a href="user?action=logout" class="logout">Đăng xuất</a>
   </div>
 
