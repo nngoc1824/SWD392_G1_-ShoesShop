@@ -148,7 +148,7 @@
     <% } %>
 
     <div class="links">
-        <p><a href="WEB-INF/login.jsp">Đã có tài khoản? Đăng nhập</a></p>
+        <p><a href="user?action=login">Đã có tài khoản? Đăng nhập</a></p>
         <p><a href="home">Về trang chủ</a></p>
     </div>
 </div>

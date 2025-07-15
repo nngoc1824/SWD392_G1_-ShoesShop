@@ -299,10 +299,6 @@ public class UserController extends HttpServlet {
             return;
         }
 
-        // Có thể load lại từ DB nếu muốn dữ liệu mới nhất:
-        // User latestUser = userDAO.getUserById(user.getUserId());
-        // request.setAttribute("user", latestUser);
-
         request.setAttribute("user", user);
         request.getRequestDispatcher("WEB-INF/view-profile.jsp").forward(request, response);
     }

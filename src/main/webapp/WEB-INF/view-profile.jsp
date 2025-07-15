@@ -98,12 +98,14 @@
 
     <p><strong>Địa chỉ:</strong> <span id="fullAddress">Đang tải...</span></p>
 
-    <a href="user?action=logout" class="btn" style="background-color: #28a745;">🔐 Đổi mật khẩu</a>
+    <a href="user?action=changePassword" class="btn" style="background-color: #28a745;">🔐 Đổi mật khẩu</a>
   </div>
 
   <div class="btn-group">
     <a href="user?action=updateProfile" class="btn">✏️ Cập nhật hồ sơ</a>
-    <a href="dashboard.jsp" class="btn" style="background-color: #6c757d;">← Quay về Dashboard</a>
+  </div>
+  <div class="btn-group">
+    <a href="home" class="btn">To HomePage</a>
   </div>
 </div>
 
