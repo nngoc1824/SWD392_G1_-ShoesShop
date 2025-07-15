@@ -17,7 +17,7 @@ import java.io.IOException;
         filterName = "ManagerFilter"
 )
 public class ManagerFilter extends HttpFilter {
-    private static final Logger log = LoggerFactory.getLogger(ManagerFilter.class);
+//    private static final Logger log = LoggerFactory.getLogger(ManagerFilter.class);
 
     @Override
     public void init() {
@@ -28,22 +28,22 @@ public class ManagerFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
         // This method is called for each request that matches the filter's URL patterns
-        log.info("ManagerFilter processing request: " + req.getRequestURI());
+//        log.info("ManagerFilter processing request: " + req.getRequestURI());
         if (req.getSession().getAttribute("user") == null) {
             // If the user is not logged in, redirect to the login page
-            log.warn("Unauthorized access attempt to: " + req.getRequestURI());
+//            log.warn("Unauthorized access attempt to: " + req.getRequestURI());
             res.sendRedirect(req.getContextPath() + "/user?action=login");
             return;
         }
         // If the user is logged in, continue with the filter chain
         // You can add additional logic here if needed, such as checking user roles or permissions
         else {
-            log.info("User is authorized, proceeding with request: " + req.getRequestURI());
+//            log.info("User is authorized, proceeding with request: " + req.getRequestURI());
             User user = (User) req.getSession().getAttribute("user");
             if (user.getRoleIds().contains(1)) {
-                log.info("User has manager role, proceeding with request: " + req.getRequestURI());
+//                log.info("User has manager role, proceeding with request: " + req.getRequestURI());
             } else {
-                log.warn("User does not have manager role, redirecting to home page: " + req.getRequestURI());
+//                log.warn("User does not have manager role, redirecting to home page: " + req.getRequestURI());
                 res.sendRedirect(req.getContextPath() + "/home");
                 return;
             }

@@ -51,6 +51,10 @@ public class UserController extends HttpServlet {
                 case "updateProfile":
                     handleUpdateProfile(request, response, userDAO);
                     break;
+                case "viewProfile":
+                    handleViewProfile(request, response, userDAO);
+                    break;
+
                 case "changePassword":
                     handleChangePassword(request, response, userDAO);
                     break;
@@ -282,4 +286,22 @@ public class UserController extends HttpServlet {
 
         request.getRequestDispatcher("WEB-INF/profile.jsp").forward(request, response);
     }
+    private void handleViewProfile(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect("WEB-INF/login.jsp");  // Hoặc forward nếu cần
+            return;
+        }
+
+        // Có thể load lại từ DB nếu muốn dữ liệu mới nhất:
+        // User latestUser = userDAO.getUserById(user.getUserId());
+        // request.setAttribute("user", latestUser);
+
+        request.setAttribute("user", user);
+        request.getRequestDispatcher("WEB-INF/view-profile.jsp").forward(request, response);
+    }
+
 }
