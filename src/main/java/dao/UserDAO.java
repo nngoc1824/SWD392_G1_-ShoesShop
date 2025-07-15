@@ -185,4 +185,47 @@ public class UserDAO {
         }
         return null;
     }
+
+    public boolean isManager(int userId) {
+        String sql = "SELECT role_id FROM UserRole WHERE user_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int roleId = rs.getInt("role_id");
+                if (roleId == 2) { // giả sử 2 là Manager
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String username = "root";
+        String password = "1234";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            UserDAO userDAO = new UserDAO(conn);
+
+            int userIdToCheck = 3; // Nhập ID user cần kiểm tra ở đây
+
+            boolean isManager = userDAO.isManager(userIdToCheck);
+
+            if (isManager) {
+                System.out.println("✅ User ID " + userIdToCheck + " là Manager.");
+            } else {
+                System.out.println("❌ User ID " + userIdToCheck + " KHÔNG phải Manager.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 }

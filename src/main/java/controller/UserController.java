@@ -84,13 +84,20 @@ public class UserController extends HttpServlet {
 
         User user = userDAO.login(username, password);
         if (user != null) {
-            request.getSession().setAttribute("user", user);
-            response.sendRedirect("home");
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+
+            if (userDAO.isManager(user.getUserId())) {
+                response.sendRedirect("product"); // Nếu là manager thì chuyển đến product
+            } else {
+                response.sendRedirect("home"); // Người dùng bình thường về home
+            }
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
+
 
     private void handleRegister(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
             throws ServletException, IOException {

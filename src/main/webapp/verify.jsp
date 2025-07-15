@@ -124,7 +124,7 @@
 <div class="navbar">
   <div class="logo">Shoe Shop</div>
   <div class="nav-links">
-    <a href="home.jsp">Trang chủ</a>
+    <a href="home">Trang chủ</a>
     <a href="register.jsp">Đăng ký</a>
   </div>
 </div>
