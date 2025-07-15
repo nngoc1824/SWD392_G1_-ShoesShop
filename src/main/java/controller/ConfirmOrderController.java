@@ -49,16 +49,10 @@ public class ConfirmOrderController extends HttpServlet {
             return;
         }
 
-<<<<<<< Updated upstream
         // Load cart & location data for confirmOrder page
         loadPageData(request);
         request.getRequestDispatcher("/WEB-INF/confirmOrder.jsp").forward(request, response);
-=======
-        request.setAttribute("cart", cartItems);
-        HttpSession session = request.getSession(true);
-        session.setAttribute("cartItem", cartItems);
         request.getRequestDispatcher("confirmOrder.jsp").forward(request, response);
->>>>>>> Stashed changes
     }
 
     @Override
@@ -133,14 +127,8 @@ public class ConfirmOrderController extends HttpServlet {
         }
 
         request.setAttribute("cart", cartItems);
-<<<<<<< Updated upstream
-=======
         HttpSession session = request.getSession(true);
         session.setAttribute("cartItem", cartItems);
-        request.setAttribute("shippingFee", shippingFee);
-        request.getRequestDispatcher("confirmOrder.jsp").forward(request, response);
-    }
->>>>>>> Stashed changes
 
         try {
             String provinces = ghnProxy.getProvinces();
