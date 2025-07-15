@@ -18,25 +18,46 @@ import java.util.List;
 public class UserController extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        Connection conn = null;
+        if (action == null) action = "login";
 
-        try {
-            conn = new DBContext().getConnection();
+        try (Connection conn = new DBContext().getConnection()) {
+            UserDAO userDAO = new UserDAO(conn);
+
+            switch (action) {
+                case "logout":
+                    handleLogout(request, response);
+                    break;
+                case "viewProfile":
+                    handleViewProfile(request, response, userDAO);
+                    break;
+                case "verify":
+                    handleVerify(request, response);
+                    break;
+                case "showUpdateProfileForm":
+                    showUpdateProfileForm(request, response);
+                    break;
+                default:
+                    response.sendRedirect("WEB-INF/login.jsp");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi kết nối CSDL: " + e.getMessage());
+            request.getRequestDispatcher("error.jsp").forward(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String action = request.getParameter("action");
+
+        try (Connection conn = new DBContext().getConnection()) {
             UserDAO userDAO = new UserDAO(conn);
 
             switch (action) {
@@ -46,23 +67,12 @@ public class UserController extends HttpServlet {
                 case "register":
                     handleRegister(request, response, userDAO);
                     break;
-                case "logout":
-                    handleLogout(request, response);
-                    break;
                 case "updateProfile":
                     handleUpdateProfile(request, response, userDAO);
                     break;
-                case "viewProfile":
-                    handleViewProfile(request, response, userDAO);
-                    break;
-
                 case "changePassword":
                     handleChangePassword(request, response, userDAO);
                     break;
-                case "verify":
-                    handleVerify(request, response);
-                    break;
-
                 default:
                     response.sendRedirect("WEB-INF/login.jsp");
             }
@@ -71,12 +81,6 @@ public class UserController extends HttpServlet {
             e.printStackTrace();
             request.setAttribute("error", "Lỗi kết nối CSDL: " + e.getMessage());
             request.getRequestDispatcher("error.jsp").forward(request, response);
-
-        } finally {
-            try {
-                if (conn != null && !conn.isClosed()) conn.close();
-            } catch (Exception ignored) {
-            }
         }
     }
 
@@ -94,16 +98,15 @@ public class UserController extends HttpServlet {
             session.setAttribute("user", user);
 
             if (roles.contains("Manager")) {
-                response.sendRedirect("product"); // Nếu là manager thì chuyển đến product
+                response.sendRedirect("product");
             } else {
-                response.sendRedirect("home"); // Người dùng bình thường về home
+                response.sendRedirect("home");
             }
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
         }
     }
-
 
     private void handleRegister(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
             throws ServletException, IOException {
@@ -133,7 +136,7 @@ public class UserController extends HttpServlet {
                 .email(email)
                 .fullName(fullName)
                 .phone(phone)
-                .status(0) // chưa kích hoạt
+                .status(0)
                 .build();
 
         boolean isSuccess = userDAO.register(user);
@@ -256,7 +259,6 @@ public class UserController extends HttpServlet {
             }
         }
 
-        System.out.println("Image URL: " + imageUrl);
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");
@@ -264,7 +266,6 @@ public class UserController extends HttpServlet {
         String provinceId = request.getParameter("province");
         String districtId = request.getParameter("district");
         String wardCode = request.getParameter("ward");
-
 
         sessionUser.setFullName(fullName);
         sessionUser.setEmail(email);
@@ -274,9 +275,6 @@ public class UserController extends HttpServlet {
         session.setAttribute("ghn_province", provinceId);
         session.setAttribute("ghn_district", districtId);
         session.setAttribute("ghn_ward", wardCode);
-
-
-
 
         boolean updated = userDAO.updateUser(sessionUser);
 
@@ -289,18 +287,32 @@ public class UserController extends HttpServlet {
 
         request.getRequestDispatcher("WEB-INF/profile.jsp").forward(request, response);
     }
+
     private void handleViewProfile(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            response.sendRedirect("WEB-INF/login.jsp");  // Hoặc forward nếu cần
+            response.sendRedirect("WEB-INF/login.jsp");
             return;
         }
 
         request.setAttribute("user", user);
         request.getRequestDispatcher("WEB-INF/view-profile.jsp").forward(request, response);
+    }
+    private void showUpdateProfileForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        request.setAttribute("user", user);
+        request.getRequestDispatcher("WEB-INF/profile.jsp").forward(request, response);
     }
 
 }
