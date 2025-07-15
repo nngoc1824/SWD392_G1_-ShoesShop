@@ -93,7 +93,7 @@ public class UserController extends HttpServlet {
             }
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng.");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
         }
     }
 
@@ -110,13 +110,13 @@ public class UserController extends HttpServlet {
 
         if (userDAO.isUsernameTaken(username)) {
             request.setAttribute("error", "Tên đăng nhập đã được sử dụng.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
             return;
         }
 
         if (!password.equals(confirmPassword)) {
             request.setAttribute("error", "Mật khẩu xác nhận không khớp.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
             return;
         }
 
@@ -138,10 +138,10 @@ public class UserController extends HttpServlet {
             session.setAttribute("verificationCode", code);
             session.setAttribute("pendingEmail", email);
 
-            response.sendRedirect("verify.jsp");
+            response.sendRedirect("WEB-INF/verify.jsp");
         } else {
             request.setAttribute("error", "Đăng ký thất bại.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
         }
     }
 
@@ -160,20 +160,20 @@ public class UserController extends HttpServlet {
                     session.removeAttribute("verificationCode");
                     session.removeAttribute("pendingEmail");
                     request.setAttribute("message", "Xác minh thành công! Bạn có thể đăng nhập.");
-                    request.getRequestDispatcher("login.jsp").forward(request, response);
+                    request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
                 } else {
                     request.setAttribute("error", "Không thể kích hoạt tài khoản.");
-                    request.getRequestDispatcher("verify.jsp").forward(request, response);
+                    request.getRequestDispatcher("WEB-INF/verify.jsp").forward(request, response);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 request.setAttribute("error", "Đã xảy ra lỗi khi xác minh tài khoản.");
-                request.getRequestDispatcher("verify.jsp").forward(request, response);
+                request.getRequestDispatcher("WEB-INF/verify.jsp").forward(request, response);
             }
 
         } else {
             request.setAttribute("error", "Mã xác minh không đúng.");
-            request.getRequestDispatcher("verify.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/verify.jsp").forward(request, response);
         }
     }
 
@@ -191,7 +191,7 @@ public class UserController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("WEB-INF/login.jsp");
             return;
         }
 
@@ -203,19 +203,19 @@ public class UserController extends HttpServlet {
 
         if (sessionUser.getPassword() == null) {
             request.setAttribute("error", "Tài khoản không hỗ trợ đổi mật khẩu.");
-            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/change-password.jsp").forward(request, response);
             return;
         }
 
         if (!sessionUser.getPassword().equals(currentPassword)) {
             request.setAttribute("error", "Mật khẩu hiện tại không đúng.");
-            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/change-password.jsp").forward(request, response);
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Mật khẩu xác nhận không khớp.");
-            request.getRequestDispatcher("change-password.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/change-password.jsp").forward(request, response);
             return;
         }
 
@@ -227,7 +227,7 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Lỗi khi đổi mật khẩu.");
         }
 
-        request.getRequestDispatcher("change-password.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/change-password.jsp").forward(request, response);
     }
 
     private void handleUpdateProfile(HttpServletRequest request, HttpServletResponse response, UserDAO userDAO)
@@ -236,7 +236,7 @@ public class UserController extends HttpServlet {
         User sessionUser = (User) session.getAttribute("user");
         Part imagePart = request.getPart("image");
         if (sessionUser == null) {
-            response.sendRedirect("login.jsp");
+            response.sendRedirect("WEB-INF/login.jsp");
             return;
         }
         String imageUrl = "";
@@ -280,6 +280,6 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Cập nhật thất bại. Vui lòng thử lại.");
         }
 
-        request.getRequestDispatcher("profile.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/profile.jsp").forward(request, response);
     }
 }

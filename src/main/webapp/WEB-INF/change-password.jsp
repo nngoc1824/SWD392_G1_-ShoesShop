@@ -143,7 +143,7 @@
     <% } %>
 
     <div class="back-link">
-        <a href="profile.jsp">← Quay lại hồ sơ</a>
+        <a href="WEB-INF/profile.jsp">← Quay lại hồ sơ</a>
     </div>
 </div>
 
