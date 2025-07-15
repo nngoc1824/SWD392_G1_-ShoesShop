@@ -40,7 +40,7 @@ public class ManagerFilter extends HttpFilter {
         else {
             log.info("User is authorized, proceeding with request: " + req.getRequestURI());
             User user = (User) req.getSession().getAttribute("user");
-            if (user.getRoleIds().contains(1)) {
+            if (user.getRoles().contains("Manager")) {
                 log.info("User has manager role, proceeding with request: " + req.getRequestURI());
             } else {
                 log.warn("User does not have manager role, redirecting to home page: " + req.getRequestURI());

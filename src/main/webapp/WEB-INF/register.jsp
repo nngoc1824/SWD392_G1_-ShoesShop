@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="../user_action/register.css">
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/user_action/register.css">
     <title>Đăng ký tài khoản</title>
 
 
