@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dao.ProductDAO;
-import entites.CartItem;
-import entites.Order;
-import entites.Product;
+import entites.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import service.OrderItemService;
 import service.OrderService;
 import utils.DBContext;
 import proxy.PayOSInitializer;
@@ -51,6 +50,7 @@ public class CheckoutServlet extends HttpServlet {
 
             String firstName = req.getParameter("firstName");
             String lastName = req.getParameter("lastName");
+            String phone = req.getParameter("phone");
 
             double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
 
@@ -80,12 +80,16 @@ public class CheckoutServlet extends HttpServlet {
                     .build();
 
             Order pendingOrder = Order.builder()
+                    .orderId((int) orderCode) // Gán ID từ orderCode đã sinh!
                     .shipAddress(fullAddress)
                     .totalPrice(total)
                     .status(false)
                     .paymentStatus("Pending")
                     .orderDate(new Date())
+                    .phone(phone) // Đừng quên nhận phone từ form!
+                    .userId(getUserIdFromSessionOrRequest(req)) // nếu có userId
                     .build();
+
 
             req.getSession().setAttribute("pendingOrder", pendingOrder);
 
@@ -120,6 +124,19 @@ public class CheckoutServlet extends HttpServlet {
                 try (Connection conn = new DBContext().getConnection()) {
                     OrderService service = new OrderService(conn);
                     service.save(pendingOrder);
+                }
+                try (Connection conn = new DBContext().getConnection()) {
+                    OrderItemService orderItemService = new  OrderItemService(conn);
+                    List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
+                    for (CartItem cartItem : cartItems) {
+                        OrderItem orderItem = OrderItem.builder()
+                                .orderId((int) orderCode)
+                                .productId(cartItem.getProductId())
+                                .quantity(cartItem.getQuantity())
+                                .price(cartItem.getPrice())
+                                .build();
+                        orderItemService.save(orderItem);
+                    }
                 }
 
                 session.removeAttribute("pendingOrder");
@@ -200,5 +217,15 @@ public class CheckoutServlet extends HttpServlet {
         }
         url += contextPath;
         return url;
+    }
+
+    private int getUserIdFromSessionOrRequest(HttpServletRequest req) {
+        HttpSession session = req.getSession(false); // không tạo mới nếu chưa có session
+        if (session != null && session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            return user.getUserId();
+        }
+        // Chưa login ➜ trả về 0
+        return 0;
     }
 }

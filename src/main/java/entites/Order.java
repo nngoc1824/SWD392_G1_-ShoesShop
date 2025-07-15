@@ -14,6 +14,7 @@ public class Order {
     private boolean status;
     private String shipAddress;
     private String paymentStatus;
+    private String phone;
     private int userId;
 
 }

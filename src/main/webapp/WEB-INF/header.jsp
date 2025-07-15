@@ -111,7 +111,7 @@
                             <i class="fas fa-caret-down ml-2"></i>
                         </div>
                         <div class="dropdown-menu-manual" id="userDropdownMenu">
-                            <a class="dropdown-item-manual" href="${pageContext.request.contextPath}/user?action=updateProfile">👤 Xem hồ sơ</a>
+                            <a class="dropdown-item-manual" href="${pageContext.request.contextPath}/user?action=viewProfile">👤 Xem hồ sơ</a>
                             <a class="dropdown-item-manual" href="${pageContext.request.contextPath}/user?action=changePassword">🔒 Đổi mật khẩu</a>
                             <div class="dropdown-divider-manual"></div>
                             <a class="dropdown-item-manual text-danger" href="${pageContext.request.contextPath}/user?action=logout">🚪 Đăng xuất</a>
