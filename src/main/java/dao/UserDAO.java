@@ -4,6 +4,8 @@ import entites.User;
 import utils.DBContext;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
     private final Connection conn;
@@ -86,7 +88,21 @@ public class UserDAO {
         }
         return false;
     }
-
+    public List<String> getRole(int userID){
+        String sql = "SELECT r.setting_name FROM UserRole ur JOIN Setting r ON ur.role_id = r.setting_id WHERE ur.user_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userID);
+            ResultSet rs = ps.executeQuery();
+            List<String> roles = new ArrayList<>();
+            while (rs.next()) {
+                roles.add(rs.getString("setting_name"));
+            }
+            return roles;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public User getUserByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM User WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -184,5 +200,48 @@ public class UserDAO {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean isManager(int userId) {
+        String sql = "SELECT role_id FROM UserRole WHERE user_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int roleId = rs.getInt("role_id");
+                if (roleId == 2) { // giả sử 2 là Manager
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/OSS?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+        String username = "root";
+        String password = "1234";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            UserDAO userDAO = new UserDAO(conn);
+
+            int userIdToCheck = 3; // Nhập ID user cần kiểm tra ở đây
+
+            boolean isManager = userDAO.isManager(userIdToCheck);
+
+            if (isManager) {
+                System.out.println("✅ User ID " + userIdToCheck + " là Manager.");
+            } else {
+                System.out.println("❌ User ID " + userIdToCheck + " KHÔNG phải Manager.");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }

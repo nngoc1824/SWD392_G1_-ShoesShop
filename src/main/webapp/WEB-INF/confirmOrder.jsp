@@ -67,6 +67,9 @@
                     <input type="text" name="company" class="form-control" placeholder="Company (optional)">
                 </div>
                 <div class="form-group">
+                    <input type="tel" name="phone" class="form-control" placeholder="Phone" required>
+                </div>
+                <div class="form-group">
                     <input type="text" name="address" class="form-control" placeholder="Address" required>
                 </div>
                 <div class="form-row">

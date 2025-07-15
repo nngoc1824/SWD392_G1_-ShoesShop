@@ -124,8 +124,7 @@
 <div class="navbar">
   <div class="logo">Shoe Shop</div>
   <div class="nav-links">
-    <a href="home.jsp">Trang chủ</a>
-    <a href="register.jsp">Đăng ký</a>
+    <a href="home">Trang chủ</a>
   </div>
 </div>
 
@@ -143,7 +142,7 @@
   </div>
 
   <div class="back-link">
-    <a href="register.jsp">← Quay lại đăng ký</a>
+    <a href="user?action=register">← Quay lại đăng ký</a>
   </div>
 </div>
 

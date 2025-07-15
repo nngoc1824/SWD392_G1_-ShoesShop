@@ -145,7 +145,7 @@
 
 <!-- Back -->
 <div style="text-align: center; margin-top: 20px;">
-  <a href="dashboard.jsp" class="btn btn-secondary">← Về Dashboard</a>
+  <a href="user?action=viewProfile" class="btn btn-secondary">← Về Profile</a>
 </div>
 
 <script>

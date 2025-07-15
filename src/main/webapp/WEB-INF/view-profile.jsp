@@ -1,3 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page import="entites.User" %>
 <%
@@ -98,12 +100,22 @@
 
     <p><strong>Địa chỉ:</strong> <span id="fullAddress">Đang tải...</span></p>
 
-    <a href="change-password.jsp" class="btn" style="background-color: #28a745;">🔐 Đổi mật khẩu</a>
+    <a href="user?action=changePassword" class="btn" style="background-color: #28a745;">🔐 Đổi mật khẩu</a>
   </div>
 
   <div class="btn-group">
-    <a href="profile.jsp" class="btn">✏️ Cập nhật hồ sơ</a>
-    <a href="dashboard.jsp" class="btn" style="background-color: #6c757d;">← Quay về Dashboard</a>
+    <a href="user?action=showUpdateProfileForm" class="btn">✏️ Cập nhật hồ sơ</a>
+  </div>
+  <div class="btn-group">
+    <c:choose>
+      <c:when test="${fn:contains(sessionScope.user.roles, 'Manager')}">
+        <a href="product" class="btn" style="background-color: #ffc107;">⚙️ Quản lý Admin</a>
+      </c:when>
+      <c:otherwise>
+        <a href="home" class="btn">To HomePage</a>
+      </c:otherwise>
+    </c:choose>
+
   </div>
 </div>
 

@@ -6,11 +6,11 @@
     <title>Product List</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/sidebar.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/header.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/product_list.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/view/manager_pages/table_product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/manager_pages/product_list.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/manager_pages/table_product.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.2/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -157,11 +157,11 @@
                                            class="btn btn-warning btn-sm ">Edit</a>
                                         <c:if test="${product.status == 1}">
                                             <a href="?action=disable-product&id=${product.productId}"
-                                               class="btn btn-danger btn-sm ms-3">Disable</a>
+                                               onclick="handleDisabled(event)" class="btn btn-danger btn-sm ms-3">Disable</a>
                                         </c:if>
                                         <c:if test="${product.status == 0}">
                                             <a href="?action=enable-product&id=${product.productId}"
-                                               class="btn btn-success btn-sm ms-3">Enable</a>
+                                               onclick="handleEnabled(event)" class="btn btn-success btn-sm ms-3">Enable</a>
                                         </c:if>
                                     </td>
                                 </tr>
@@ -188,7 +188,67 @@
         </div>
     </div>
 </div>
+<script>
+    function handleEnabled(event) {
+        event.preventDefault();
+        const url = event.currentTarget.getAttribute('href');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, enable it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
 
+    function handleDisabled(event) {
+        event.preventDefault();
+        const url = event.currentTarget.getAttribute('href');
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, disable it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = url;
+            }
+        });
+    }
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.2/dist/sweetalert2.all.min.js"></script>
+<%-- Include the SweetAlert2 library for alerts --%>
+<%-- Check if there is a message to display --%>
+<c:if test="${not empty message}">
+    <script>
+        Swal.fire({
+            title: 'OSS Notification',
+            text: '${message}',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+    </script>
+</c:if>
+<c:if test="${not empty error}">
+    <script>
+        Swal.fire({
+            title: 'OSS Notification',
+            text: '${error}',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    </script>
+</c:if>
 <script>
     const filterCategory = document.querySelector("select[name='category']")
     console.log(filterCategory)

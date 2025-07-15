@@ -3,7 +3,7 @@
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
-        response.sendRedirect("login.jsp");
+        response.sendRedirect("user?action=login");
         return;
     }
 %>
@@ -143,7 +143,7 @@
     <% } %>
 
     <div class="back-link">
-        <a href="profile.jsp">← Quay lại hồ sơ</a>
+        <a href="WEB-INF/profile.jsp">← Quay lại hồ sơ</a>
     </div>
 </div>
 
