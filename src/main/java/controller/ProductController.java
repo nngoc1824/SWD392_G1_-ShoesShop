@@ -138,6 +138,13 @@ public class ProductController extends HttpServlet {
     }
 
     public void updateProductDetails(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setAttribute("categories", settingService.getAllCategories());
+        if (req.getParameter("err") != null) {
+            req.setAttribute("error", req.getParameter("err"));
+        }
+        if (req.getParameter("message") != null) {
+            req.setAttribute("message", req.getParameter("message"));
+        }
         String productId = req.getParameter("id");
         if (productId != null && !productId.isEmpty()) {
             try {
@@ -325,11 +332,10 @@ public class ProductController extends HttpServlet {
         if (isUpdated) {
             // Redirect to the product list page with success message
             req.setAttribute("message", "Product updated successfully!");
-            resp.sendRedirect(req.getContextPath() + "/product");
+            resp.sendRedirect("product?action=update-product&id=" + productId + "&message=Product updated successfully");
         } else {
             // Forward back to the add product page with error message
-            req.setAttribute("error", "Failed to update product. Please try again.");
-            req.getRequestDispatcher("/WEB-INF/manager_pages/add_product.jsp").forward(req, resp);
+            req.getRequestDispatcher("product?action=update-product&id=" + productId + "&err=Product updated failed").forward(req, resp);
         }
     }
 

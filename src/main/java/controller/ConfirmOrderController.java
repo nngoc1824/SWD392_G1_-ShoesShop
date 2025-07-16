@@ -6,6 +6,8 @@ import entites.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import proxy.GHNProxy;
 
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.*;
 @WebServlet("/confirmOrder")
 public class ConfirmOrderController extends HttpServlet {
 
+    private static final Logger log = LoggerFactory.getLogger(ConfirmOrderController.class);
     private ProductDAO productDAO;
     private GHNProxy ghnProxy;
 
@@ -49,7 +52,6 @@ public class ConfirmOrderController extends HttpServlet {
             return;
         }
 
-        // Load cart & location data for confirmOrder page
         loadPageData(request);
         request.getRequestDispatcher("/WEB-INF/confirmOrder.jsp").forward(request, response);
         request.getRequestDispatcher("confirmOrder.jsp").forward(request, response);
@@ -59,9 +61,9 @@ public class ConfirmOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int wardCode = Integer.parseInt(request.getParameter("ward"));
+        String wardCode = request.getParameter("ward");
         int districtStr = Integer.parseInt(request.getParameter("district"));
-
+        log.info("Ward Code: {}, District ID: {}", wardCode, districtStr);
         int shippingFee = 0;
         try {
             shippingFee = ghnProxy.calculateShippingFee(districtStr, wardCode);
@@ -98,8 +100,8 @@ public class ConfirmOrderController extends HttpServlet {
 
     private void handleShippingFee(HttpServletRequest request, HttpServletResponse response) throws Exception {
         int districtId = Integer.parseInt(request.getParameter("districtId"));
-        int wardCode = Integer.parseInt(request.getParameter("wardCode"));
-
+        String wardCode =request.getParameter("wardCode");
+        log.info("Calculating shipping fee for district ID: {}, ward code: {}", districtId, wardCode);
         int shippingFee = ghnProxy.calculateShippingFee(districtId, wardCode);
 
         response.setContentType("application/json");
@@ -157,7 +159,8 @@ public class ConfirmOrderController extends HttpServlet {
                             cartMap.put(pid, qty);
                         }
                     }
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
         }
         return cartMap;

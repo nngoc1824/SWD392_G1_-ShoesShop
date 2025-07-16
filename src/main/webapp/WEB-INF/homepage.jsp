@@ -76,9 +76,6 @@
                         <div class="card-body">
                             <h5 class="card-title">${p.productName}</h5>
 
-                            <p class="card-text mb-1 old-price">
-                                <fmt:formatNumber value="${p.purchaseCost}" type="number" groupingUsed="true"/>₫
-                            </p>
                             <p class="card-text new-price">
                                 <fmt:formatNumber value="${p.price}" type="number" groupingUsed="true"/>₫
                             </p>

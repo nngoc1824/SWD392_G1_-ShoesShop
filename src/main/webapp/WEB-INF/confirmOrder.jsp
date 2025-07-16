@@ -49,7 +49,7 @@
             <hr class="my-4">
 
             <h5>Customer Information</h5>
-            <form action="${pageContext.request.contextPath}/confirmOrder" method="post">
+            <form action="${pageContext.request.contextPath}/checkout/create" method="post">
                 <div class="form-group">
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>
@@ -210,9 +210,10 @@
         wardSelect.addEventListener("change", function () {
             const districtIdChecked = districtSelect.value;
             const wardCodeChecked = this.value;
-
+            console.log("Selected District ID:", districtIdChecked);
+            console.log("Selected Ward Code:", wardCodeChecked);
             if (districtIdChecked && wardCodeChecked) {
-                fetch(`confirmOrder?action=shippingFee&districtId=${districtIdChecked}&wardCode=${wardCodeChecked}`)
+                fetch(`confirmOrder?action=shippingFee&districtId=\${districtIdChecked}&wardCode=\${wardCodeChecked}`)
                     .then(res => res.json())
                     .then(data => {
                         const shippingFee = data.total; // Giá trị trả về từ API
@@ -220,8 +221,8 @@
                         const total = subtotal + shippingFee;
 
                         // Cập nhật UI
-                        shippingFeeSpan.textContent = `$${shippingFee}`;
-                        totalFeeSpan.textContent = `$${total.toFixed(2)}`;
+                        shippingFeeSpan.textContent = `\${shippingFee}`;
+                        totalFeeSpan.textContent = `\${total.toFixed(2)}`;
 
                         // Cập nhật input ẩn
                         shippingFeeInput.value = shippingFee;
