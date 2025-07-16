@@ -1,6 +1,5 @@
 package proxy;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -13,7 +12,7 @@ import java.net.URL;
 public class GHNProxy {
 
     private static final String TOKEN = "796859fa-5fca-11f0-9b80-96385126568f";
-    private static final String SHOP_ID = "5888673";
+    private static final String SHOP_ID = "4854101";
     private static final int FROM_DISTRICT_ID = 1451;
 
     private static final String GHN_PROVINCE_API = "https://online-gateway.ghn.vn/shiip/public-api/master-data/province";
@@ -35,49 +34,22 @@ public class GHNProxy {
         return sendPost(GHN_WARD_API, body, TOKEN);
     }
 
-    public int calculateShippingFee(int toDistrictId, int toWardCode) throws Exception {
+    public int calculateShippingFee(String toDistrictId, String toWardCode) throws Exception {
         JSONObject json = new JSONObject();
-        json.put("from_district_id", 1454); // ✅ ID kho của bạn
-        json.put("from_ward_code", "21211"); // ✅ Bắt buộc GHN
-        json.put("service_id", 53320); // ✅ Lấy đúng ID dịch vụ GHN cung cấp
-        json.put("service_type_id", JSONObject.NULL); // Hoặc null
+        json.put("from_district_id", FROM_DISTRICT_ID);
+        json.put("service_type_id", 2);
         json.put("to_district_id", toDistrictId);
-
-        json.put("to_ward_code", toDistrictId);
-        json.put("height", 50);
+        json.put("to_ward_code", toWardCode);
+        json.put("height", 10);
         json.put("length", 20);
-        json.put("weight", 200);
-        json.put("width", 20);
-        json.put("insurance_value", 10000);
-        json.put("cod_failed_amount", 2000);
-        json.put("coupon", JSONObject.NULL);
-
-        JSONArray items = new JSONArray();
-        JSONObject item = new JSONObject();
-        item.put("name", "TEST1");
-        item.put("quantity", 1);
-        item.put("height", 200);
-        item.put("weight", 1000);
-        item.put("length", 200);
-        item.put("width", 200);
-        items.put(item);
-
-        json.put("items", items);
-
-        System.out.println("Payload: " + json.toString());
+        json.put("weight", 500);
+        json.put("width", 15);
+        json.put("insurance_value", 0);
 
         String result = sendPost(GHN_FEE_API, json.toString(), TOKEN, SHOP_ID);
 
-        System.out.println("GHN trả về: " + result);
-
         JSONObject resJson = new JSONObject(result);
-
-        if (resJson.has("data") && !resJson.isNull("data")) {
-            JSONObject data = resJson.getJSONObject("data");
-            return data.getInt("total");
-        } else {
-            throw new Exception("GHN không trả về data hợp lệ: " + result);
-        }
+        return resJson.getJSONObject("data").getInt("total");
     }
 
     private String sendPost(String apiUrl, String jsonBody, String token) throws Exception {

@@ -59,16 +59,17 @@ public class ConfirmOrderController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int wardCode = Integer.parseInt(request.getParameter("ward"));
-        int districtStr = Integer.parseInt(request.getParameter("district"));
+        String wardCode = request.getParameter("ward");
+        String districtStr = request.getParameter("district");
 
         int shippingFee = 0;
         try {
-            shippingFee = ghnProxy.calculateShippingFee(districtStr, wardCode);
+            if (wardCode != null && districtStr != null) {
+                shippingFee = ghnProxy.calculateShippingFee(districtStr, wardCode);
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
-
 
         loadPageData(request);
         request.setAttribute("shippingFee", shippingFee);
@@ -97,13 +98,12 @@ public class ConfirmOrderController extends HttpServlet {
     }
 
     private void handleShippingFee(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        int districtId = Integer.parseInt(request.getParameter("districtId"));
-        int wardCode = Integer.parseInt(request.getParameter("wardCode"));
+        String districtId = request.getParameter("districtId");
+        String wardCode = request.getParameter("wardCode");
 
         int shippingFee = ghnProxy.calculateShippingFee(districtId, wardCode);
 
         response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
         response.getWriter().write("{\"fee\": " + shippingFee + "}");
     }
 
