@@ -54,6 +54,7 @@ public class ConfirmOrderController extends HttpServlet {
 
         loadPageData(request);
         request.getRequestDispatcher("/WEB-INF/confirmOrder.jsp").forward(request, response);
+        request.getRequestDispatcher("confirmOrder.jsp").forward(request, response);
     }
 
     @Override
@@ -126,6 +127,7 @@ public class ConfirmOrderController extends HttpServlet {
                 cartItems.add(item);
             }
         }
+
         request.setAttribute("cart", cartItems);
         HttpSession session = request.getSession(true);
         session.setAttribute("cartItem", cartItems);
