@@ -22,5 +22,5 @@ public class User {
     private String image;
     private int status;
     private String googleId;
-    private List<Integer> roleIds;
+    private List<String> roles;
 }
