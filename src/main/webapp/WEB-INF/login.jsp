@@ -5,10 +5,10 @@
     <title>Login Page</title>
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
 
     <!-- Optional custom CSS -->
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/user_action/login.css">
+    <link rel="stylesheet" type="text/css" href="../user_action/login.css">
 
     <script>
         function togglePassword() {
@@ -63,7 +63,7 @@
     <% } %>
 
     <div class="links">
-        <p><a href="user?action=register">Chưa có tài khoản? Đăng ký</a></p>
+        <p><a href="WEB-INF/register.jsp">Chưa có tài khoản? Đăng ký</a></p>
         <p><a href="home">Về trang chủ</a></p>
     </div>
 </div>

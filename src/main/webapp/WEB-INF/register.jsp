@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/user_action/register.css">
+    <link rel="stylesheet" type="text/css" href="../user_action/register.css">
     <title>Đăng ký tài khoản</title>
 
 
@@ -148,7 +148,7 @@
     <% } %>
 
     <div class="links">
-        <p><a href="user?action=login">Đã có tài khoản? Đăng nhập</a></p>
+        <p><a href="WEB-INF/login.jsp">Đã có tài khoản? Đăng nhập</a></p>
         <p><a href="home">Về trang chủ</a></p>
     </div>
 </div>

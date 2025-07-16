@@ -4,8 +4,6 @@ import entites.User;
 import utils.DBContext;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserDAO {
     private final Connection conn;
@@ -88,21 +86,7 @@ public class UserDAO {
         }
         return false;
     }
-    public List<String> getRole(int userID){
-        String sql = "SELECT r.setting_name FROM UserRole ur JOIN Setting r ON ur.role_id = r.setting_id WHERE ur.user_id = ?";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, userID);
-            ResultSet rs = ps.executeQuery();
-            List<String> roles = new ArrayList<>();
-            while (rs.next()) {
-                roles.add(rs.getString("setting_name"));
-            }
-            return roles;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
     public User getUserByEmail(String email) throws SQLException {
         String sql = "SELECT * FROM User WHERE email = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
