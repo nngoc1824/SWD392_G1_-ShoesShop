@@ -2,6 +2,8 @@ package proxy;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -20,6 +22,7 @@ public class GHNProxy {
     private static final String GHN_DISTRICT_API = "https://online-gateway.ghn.vn/shiip/public-api/master-data/district";
     private static final String GHN_WARD_API = "https://online-gateway.ghn.vn/shiip/public-api/master-data/ward";
     private static final String GHN_FEE_API = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
+    private static final Logger log = LoggerFactory.getLogger(GHNProxy.class);
 
     public String getProvinces() throws Exception {
         return sendPost(GHN_PROVINCE_API, "{}", TOKEN);
@@ -35,7 +38,8 @@ public class GHNProxy {
         return sendPost(GHN_WARD_API, body, TOKEN);
     }
 
-    public int calculateShippingFee(int toDistrictId, int toWardCode) throws Exception {
+    public int calculateShippingFee(int toDistrictId, String toWardCode) throws Exception {
+        log.info("Calculating shipping fee to district ID: {}, ward code: {}", toDistrictId, toWardCode);
         JSONObject json = new JSONObject();
         json.put("from_district_id", 1454); // ✅ ID kho của bạn
         json.put("from_ward_code", "21211"); // ✅ Bắt buộc GHN
@@ -43,7 +47,7 @@ public class GHNProxy {
         json.put("service_type_id", JSONObject.NULL); // Hoặc null
         json.put("to_district_id", toDistrictId);
 
-        json.put("to_ward_code", toDistrictId);
+        json.put("to_ward_code", toWardCode+"");
         json.put("height", 50);
         json.put("length", 20);
         json.put("weight", 200);

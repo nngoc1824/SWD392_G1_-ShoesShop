@@ -9,6 +9,7 @@ import utils.EmailValidate;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
@@ -39,6 +40,9 @@ public class UserController extends HttpServlet {
                     break;
                 case "showUpdateProfileForm":
                     showUpdateProfileForm(request, response);
+                    break;
+                case "register":
+                    request.getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
                     break;
                 default:
                     request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
@@ -148,7 +152,7 @@ public class UserController extends HttpServlet {
             session.setAttribute("verificationCode", code);
             session.setAttribute("pendingEmail", email);
 
-            response.sendRedirect("WEB-INF/verify.jsp");
+            request.getRequestDispatcher("WEB-INF/verify.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Đăng ký thất bại.");
             request.getRequestDispatcher("WEB-INF/register.jsp").forward(request, response);
@@ -201,7 +205,7 @@ public class UserController extends HttpServlet {
 
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("user") == null) {
-           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
 
@@ -246,7 +250,7 @@ public class UserController extends HttpServlet {
         User sessionUser = (User) session.getAttribute("user");
         Part imagePart = request.getPart("image");
         if (sessionUser == null) {
-           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
         String imageUrl = "";
@@ -294,20 +298,21 @@ public class UserController extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-           request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
 
         request.setAttribute("user", user);
         request.getRequestDispatcher("WEB-INF/view-profile.jsp").forward(request, response);
     }
+
     private void showUpdateProfileForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            response.sendRedirect("login.jsp");
+            request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response);
             return;
         }
 

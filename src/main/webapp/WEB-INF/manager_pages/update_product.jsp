@@ -11,14 +11,14 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/WEB-INF/common/manager_pages/table_product.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.2/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
           integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <!-- Tagify CSS & JS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.22.2/dist/sweetalert2.all.min.js"></script>
     <style>
         * {
             font-family: 'Segoe UI', sans-serif;
@@ -254,7 +254,28 @@
         <div class="mt-2 text-light">Processing...</div>
     </div>
 </div>
+<c:if test="${not empty error}">
+    <script>
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '${error}',
+            confirmButtonText: 'OK'
+        });
+    </script>
+</c:if>
+<c:if test="${not empty message}">
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '${message}',
+            confirmButtonText: 'OK'
+        }).then(() => {
 
+        });
+    </script>
+</c:if>
 <script>
     const toggleBtn = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
