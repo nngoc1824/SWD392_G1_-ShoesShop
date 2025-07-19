@@ -21,7 +21,7 @@ public class OrderDTO {
     private String orderCode; // Maps to orderId as string
     private double totalPrice;
     private Date orderDate;
-    private boolean isDelivered; // Maps to status field
+    private boolean delivered; // Maps to status field
     private String shipAddress;
     private String paymentStatus;
     private String phone;
@@ -38,7 +38,7 @@ public class OrderDTO {
                 .orderCode(String.valueOf(order.getOrderId())) // Use orderId as orderCode
                 .totalPrice(order.getTotalPrice())
                 .orderDate(order.getOrderDate())
-                .isDelivered(order.isStatus()) // Map status to isDelivered
+                .delivered(order.isStatus()) // Map status to delivered
                 .shipAddress(order.getShipAddress())
                 .paymentStatus(order.getPaymentStatus())
                 .phone(order.getPhone())
@@ -54,7 +54,7 @@ public class OrderDTO {
                 .orderId(this.orderId)
                 .totalPrice(this.totalPrice)
                 .orderDate(this.orderDate)
-                .status(this.isDelivered) // Map isDelivered back to status
+                .status(this.delivered) // Map delivered back to status
                 .shipAddress(this.shipAddress)
                 .paymentStatus(this.paymentStatus)
                 .phone(this.phone)

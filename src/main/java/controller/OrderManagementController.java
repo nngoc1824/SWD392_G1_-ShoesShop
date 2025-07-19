@@ -157,7 +157,7 @@ public class OrderManagementController extends HttpServlet {
             // Get form parameters
             int orderId = Integer.parseInt(request.getParameter("orderId"));
             double totalPrice = Double.parseDouble(request.getParameter("totalPrice"));
-            boolean isDelivered = "on".equals(request.getParameter("isDelivered"));
+            boolean isDelivered = "on".equals(request.getParameter("delivered"));
             String shipAddress = request.getParameter("shipAddress");
             String paymentStatus = request.getParameter("paymentStatus");
             // Note: orderCode is ignored as it's just orderId for display
