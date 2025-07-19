@@ -1,150 +1,130 @@
 package dao;
 
 import entites.Order;
-import entites.PaymentStatus;
-import utils.DBContext;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-public class OrderDAO extends DBContext {
+public class OrderDAO {
+    private final Connection conn;
 
-    /**
-     * Lấy danh sách order với phân trang, search và filter theo userId
-     */
-    public List<Order> getOrders(Integer userId, String search, int page, int pageSize) {
+    public OrderDAO(Connection conn) {
+        this.conn = conn;
+    }
+
+    // Tạo đơn hàng với ID tự truyền vào
+    public int create(Order order) throws SQLException {
+        String sql = "INSERT INTO `Order` (order_id, total_price, order_date, status, ship_address, payment_status, phone, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, order.getOrderId());
+            stmt.setDouble(2, order.getTotalPrice());
+            stmt.setDate(3, new java.sql.Date(order.getOrderDate().getTime()));
+            stmt.setBoolean(4, order.isStatus());
+            stmt.setString(5, order.getShipAddress());
+            stmt.setString(6, order.getPaymentStatus());
+            stmt.setString(7, order.getPhone());
+            if (order.getUserId() != 0) {
+                stmt.setInt(8, order.getUserId());
+            } else {
+                stmt.setNull(8, java.sql.Types.INTEGER);
+            }
+
+            int rows = stmt.executeUpdate();
+            if (rows > 0) return order.getOrderId();
+        }
+        return -1;
+    }
+
+    // Tìm đơn hàng theo ID
+    public Optional<Order> findById(int orderId) throws SQLException {
+        String sql = "SELECT * FROM `Order` WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return Optional.of(mapRow(rs));
+        }
+        return Optional.empty();
+    }
+
+    // Tìm đơn hàng theo userId
+    public List<Order> findByUserId(int userId) throws SQLException {
+        String sql = "SELECT * FROM `Order` WHERE user_id = ?";
         List<Order> orders = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(
-                "SELECT orderId, orderCode, totalPrice, orderDate, status, shipAddress, paymentStatus, userId " +
-                        "FROM oss.order WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-
-        if (userId != null) {
-            sql.append(" AND userId = ?");
-            params.add(userId);
-        }
-        if (search != null && !search.isBlank()) {
-            sql.append(" AND (CAST(orderCode AS CHAR) LIKE ? OR shipAddress LIKE ?)");
-            String term = "%" + search.trim() + "%";
-            params.add(term);
-            params.add(term);
-        }
-        sql.append(" ORDER BY orderDate DESC LIMIT ? OFFSET ?");
-        params.add(pageSize);
-        params.add((page - 1) * pageSize);
-
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                orders.add(mapRow(rs));
             }
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    orders.add(Order.builder()
-                            .orderId(rs.getInt("orderId"))
-                            .orderCode(rs.getLong("orderCode"))
-                            .totalPrice(rs.getDouble("totalPrice"))
-                            .orderDate(rs.getTimestamp("orderDate").toLocalDateTime())
-                            .isDelivered(rs.getBoolean("status"))
-                            .shipAddress(rs.getString("shipAddress"))
-                            .paymentStatus(PaymentStatus.fromCode(rs.getString("paymentStatus")))
-                            .userId(rs.getInt("userId"))
-                            .build());
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return orders;
     }
 
-    /**
-     * Đếm tổng số order theo điều kiện filter và search
-     */
-    public int countOrders(Integer userId, String search) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM oss.order WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-
-        if (userId != null) {
-            sql.append(" AND userId = ?");
-            params.add(userId);
-        }
-        if (search != null && !search.isBlank()) {
-            sql.append(" AND (CAST(orderCode AS CHAR) LIKE ? OR shipAddress LIKE ?)");
-            String term = "%" + search.trim() + "%";
-            params.add(term);
-            params.add(term);
-        }
-
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
+    // Lấy đơn chưa thanh toán
+    public List<Order> findUnpaidOrders() throws SQLException {
+        String sql = "SELECT * FROM `Order` WHERE status = false OR payment_status != 'Paid'";
+        List<Order> orders = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                orders.add(mapRow(rs));
             }
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return 0;
+        return orders;
     }
 
-    /**
-     * Lấy order theo ID
-     */
-    public Order getOrderById(int orderId) {
-        String sql = "SELECT * FROM oss.order WHERE orderId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, orderId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return Order.builder()
-                            .orderId(rs.getInt("orderId"))
-                            .orderCode(rs.getLong("orderCode"))
-                            .totalPrice(rs.getDouble("totalPrice"))
-                            .orderDate(rs.getTimestamp("orderDate").toLocalDateTime())
-                            .isDelivered(rs.getBoolean("status"))
-                            .shipAddress(rs.getString("shipAddress"))
-                            .paymentStatus(PaymentStatus.fromCode(rs.getString("paymentStatus")))
-                            .userId(rs.getInt("userId"))
-                            .build();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    // Cập nhật trạng thái thanh toán
+    public boolean updateStatus(int orderId, boolean status, String paymentStatus) throws SQLException {
+        String sql = "UPDATE `Order` SET status = ?, payment_status = ? WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBoolean(1, status);
+            stmt.setString(2, paymentStatus);
+            stmt.setInt(3, orderId);
+            return stmt.executeUpdate() > 0;
         }
-        return null;
     }
 
-    /**
-     * Cập nhật order
-     */
-    public boolean updateOrder(Order order) {
-        String sql = "" +
-                "UPDATE oss.order SET orderCode = ?, totalPrice = ?, status = ?, " +
-                "shipAddress = ?, paymentStatus = ? WHERE orderId = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setLong(1, order.getOrderCode());
-            ps.setDouble(2, order.getTotalPrice());
-            ps.setBoolean(3, order.getIsDelivered());
-            ps.setString(4, order.getShipAddress());
-            ps.setString(5, order.getPaymentStatus().getCode());
-            ps.setInt(6, order.getOrderId());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+    // Cập nhật địa chỉ giao hàng
+    public boolean updateAddress(int orderId, String newAddress) throws SQLException {
+        String sql = "UPDATE `Order` SET ship_address = ? WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newAddress);
+            stmt.setInt(2, orderId);
+            return stmt.executeUpdate() > 0;
         }
     }
+
+    // ✅ Cập nhật số điện thoại (nếu cần)
+    public boolean updatePhone(int orderId, String newPhone) throws SQLException {
+        String sql = "UPDATE `Order` SET phone = ? WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newPhone);
+            stmt.setInt(2, orderId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    // Xoá đơn hàng
+    public boolean delete(int orderId) throws SQLException {
+        String sql = "DELETE FROM `Order` WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, orderId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    // Ánh xạ từ ResultSet sang đối tượng Order
+    private Order mapRow(ResultSet rs) throws SQLException {
+        return Order.builder()
+                .orderId(rs.getInt("order_id"))
+                .totalPrice(rs.getDouble("total_price"))
+                .orderDate(rs.getDate("order_date")) // DATE
+                .status(rs.getBoolean("status"))
+                .shipAddress(rs.getString("ship_address"))
+                .paymentStatus(rs.getString("payment_status"))
+                .phone(rs.getString("phone")) // thêm phone
+                .userId(rs.getInt("user_id"))
+                .build();
+    }
+
 }

@@ -12,43 +12,33 @@ import java.util.List;
 public class CartDAO extends DBContext {
 
     public List<Cart> getAllCarts(int userId) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM Cart WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-
-        if (userId != 0) {
-            sql.append(" AND userId = ?");
-            params.add(userId);
-        }
-
+        String sql = "SELECT * FROM Cart WHERE user_id = ?";
         List<Cart> carts = new ArrayList<>();
+
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
-
+            stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
+
             while (rs.next()) {
-                Cart cart = new Cart().builder()
-                        .cartId(rs.getInt("cartId"))
-                        .total(rs.getDouble("total"))
-                        .quantity(rs.getInt("quantity"))
-                        .userId(rs.getInt("userId"))
-                        .build();
+                Cart cart = new Cart();
+                cart.setCartId(rs.getInt("cart_id"));
+                cart.setUserId(rs.getInt("user_id"));
+                cart.setTotal(rs.getDouble("total"));
+                cart.setQuantity(rs.getInt("quantity"));
                 carts.add(cart);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
 
         return carts;
     }
 
     public Cart getCartById(int cartId) {
-        String sql = "SELECT * FROM Cart WHERE cartId = ?";
+        String sql = "SELECT * FROM Cart WHERE cart_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -56,12 +46,36 @@ public class CartDAO extends DBContext {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new Cart().builder()
-                        .cartId(rs.getInt("cartId"))
-                        .total(rs.getDouble("total"))
-                        .quantity(rs.getInt("quantity"))
-                        .userId(rs.getInt("userId"))
-                        .build();
+                Cart cart = new Cart();
+                cart.setCartId(rs.getInt("cart_id"));
+                cart.setUserId(rs.getInt("user_id"));
+                cart.setTotal(rs.getDouble("total"));
+                cart.setQuantity(rs.getInt("quantity"));
+                return cart;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public Cart getCartByUserId(int userId) {
+        String sql = "SELECT * FROM Cart WHERE user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Cart cart = new Cart();
+                cart.setCartId(rs.getInt("cart_id"));
+                cart.setUserId(rs.getInt("user_id"));
+                cart.setTotal(rs.getDouble("total"));
+                cart.setQuantity(rs.getInt("quantity"));
+                return cart;
             }
 
         } catch (Exception e) {
@@ -72,7 +86,7 @@ public class CartDAO extends DBContext {
     }
 
     public boolean insertCart(Cart cart) {
-        String sql = "INSERT INTO Cart (total, quantity, userId) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO Cart (total, quantity, user_id) VALUES (?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -90,7 +104,7 @@ public class CartDAO extends DBContext {
     }
 
     public boolean updateCart(Cart cart) {
-        String sql = "UPDATE Cart SET total = ?, quantity = ?, userId = ? WHERE cartId = ?";
+        String sql = "UPDATE Cart SET total = ?, quantity = ?, user_id = ? WHERE cart_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -122,27 +136,16 @@ public class CartDAO extends DBContext {
 
         return false;
     }
+
+    // Test
     public static void main(String[] args) {
-        CartDAO cartDAO = new CartDAO();
-
-        // 🔹 1. Test thêm giỏ hàng
-//        Cart newCart = new Cart().builder()
-//                .total(0.0)
-//                .quantity(0)
-//                .userId(2)
-//                .build();
-//        boolean insertResult = cartDAO.insertCart(newCart);
-//        System.out.println("Insert Cart: " + insertResult);
-
-        // 🔹 2. Test lấy danh sách giỏ hàng theo userId
-        List<Cart> carts = cartDAO.getAllCarts(2);
-        System.out.println("Cart list for userId=2:");
-        for (Cart c : carts) {
+        CartDAO dao = new CartDAO();
+        List<Cart> list = dao.getAllCarts(2);
+        for (Cart c : list) {
             System.out.println("Cart ID: " + c.getCartId() +
-                    ", Total: " + c.getTotal() +
+                    ", User ID: " + c.getUserId() +
                     ", Quantity: " + c.getQuantity() +
-                    ", User ID: " + c.getUserId());
+                    ", Total: " + c.getTotal());
         }
-
     }
 }

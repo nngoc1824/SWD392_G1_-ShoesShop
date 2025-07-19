@@ -1,6 +1,5 @@
 package dao;
 
-
 import entites.CartItem;
 import utils.DBContext;
 
@@ -11,9 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CartItemDAO extends DBContext {
-    // Lấy 1 cart item theo cartItemId
+
+    // Lấy 1 cart item theo cartitem_id
     public CartItem getCartItem(int cartItemId) {
-        String sql = "SELECT * FROM CartItem WHERE cartItemId = ?";
+        String sql = "SELECT * FROM CartItem WHERE cartitem_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -22,9 +22,9 @@ public class CartItemDAO extends DBContext {
 
             if (rs.next()) {
                 return CartItem.builder()
-                        .cartItemId(rs.getInt("cartItemId"))
-                        .cartId(rs.getInt("cartId"))
-                        .productId(rs.getInt("productId"))
+                        .cartItemId(rs.getInt("cartitem_id"))
+                        .cartId(rs.getInt("cart_id"))
+                        .productId(rs.getInt("product_id"))
                         .quantity(rs.getInt("quantity"))
                         .price(rs.getDouble("price"))
                         .build();
@@ -36,30 +36,22 @@ public class CartItemDAO extends DBContext {
         return null;
     }
 
-    // Lấy tất cả cart item theo cartId
+    // Lấy tất cả cart item theo cart_id
     public List<CartItem> getCartItemsByCartId(int cartId) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM CartItem WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-
-        if (cartId != 0) {
-            sql.append(" AND cartId = ?");
-            params.add(cartId);
-        }
-
+        String sql = "SELECT * FROM CartItem WHERE cart_id = ?";
         List<CartItem> items = new ArrayList<>();
+
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            for (int i = 0; i < params.size(); i++) {
-                stmt.setObject(i + 1, params.get(i));
-            }
-
+            stmt.setInt(1, cartId);
             ResultSet rs = stmt.executeQuery();
+
             while (rs.next()) {
-                CartItem item = new CartItem().builder()
-                        .cartItemId(rs.getInt("cartItemId"))
-                        .cartId(rs.getInt("cartId"))
-                        .productId(rs.getInt("productId"))
+                CartItem item = CartItem.builder()
+                        .cartItemId(rs.getInt("cartitem_id"))
+                        .cartId(rs.getInt("cart_id"))
+                        .productId(rs.getInt("product_id"))
                         .quantity(rs.getInt("quantity"))
                         .price(rs.getDouble("price"))
                         .build();
@@ -68,7 +60,6 @@ public class CartItemDAO extends DBContext {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
 
         return items;
@@ -76,7 +67,7 @@ public class CartItemDAO extends DBContext {
 
     // Thêm mới cart item
     public boolean insertCartItem(CartItem item) {
-        String sql = "INSERT INTO CartItem (cartId, productId, quantity, price) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO CartItem (cart_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -93,9 +84,9 @@ public class CartItemDAO extends DBContext {
         return false;
     }
 
-    // Cập nhật số lượng và giá
+    // Cập nhật cart item
     public boolean updateCartItem(CartItem item) {
-        String sql = "UPDATE CartItem SET quantity = ?, price = ? WHERE cartItemId = ?";
+        String sql = "UPDATE CartItem SET quantity = ?, price = ? WHERE cartitem_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -111,9 +102,9 @@ public class CartItemDAO extends DBContext {
         return false;
     }
 
-    // Xóa cart item theo cartItemId
+    // Xóa cart item theo cartitem_id
     public boolean deleteCartItem(int cartItemId) {
-        String sql = "DELETE FROM CartItem WHERE cartItemId = ?";
+        String sql = "DELETE FROM CartItem WHERE cartitem_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -126,9 +117,9 @@ public class CartItemDAO extends DBContext {
         return false;
     }
 
-    // Xóa tất cả cart item theo cartId
+    // Xóa tất cả cart item theo cart_id
     public boolean deleteCartItemsByCartId(int cartId) {
-        String sql = "DELETE FROM CartItem WHERE cartId = ?";
+        String sql = "DELETE FROM CartItem WHERE cart_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -141,46 +132,42 @@ public class CartItemDAO extends DBContext {
         return false;
     }
 
-        public static void main(String[] args) {
-            CartItemDAO dao = new CartItemDAO();
+    // Test
+    public static void main(String[] args) {
+        CartItemDAO dao = new CartItemDAO();
 
-            // 1. Thêm cart item
-            CartItem item = CartItem.builder()
-                    .cartId(2)
-                    .productId(7)
-                    .quantity(2)
-                    .price(150.0)
-                    .build();
+        // Thêm mới
+        CartItem item = CartItem.builder()
+                .cartId(2)
+                .productId(7)
+                .quantity(2)
+                .price(150.0)
+                .build();
 
-            boolean inserted = dao.insertCartItem(item);
-            System.out.println("Insert success? " + inserted);
+        boolean inserted = dao.insertCartItem(item);
+        System.out.println("Insert success? " + inserted);
 
-            // 2. Lấy danh sách cart item theo cartId
-            List<CartItem> itemList = dao.getCartItemsByCartId(1);
-            System.out.println("Cart items for cartId = 1:");
-            for (CartItem i : itemList) {
-                System.out.println(i);
-            }
-
-            // 3. Cập nhật item đầu tiên (nếu có)
-            if (!itemList.isEmpty()) {
-                CartItem toUpdate = itemList.get(0);
-                toUpdate.setQuantity(toUpdate.getQuantity() + 1);
-                toUpdate.setPrice(toUpdate.getPrice() + 10.0);
-                boolean updated = dao.updateCartItem(toUpdate);
-                System.out.println("Update success? " + updated);
-            }
-
-            // 4. Xoá cart item theo ID (nếu có)
-            if (!itemList.isEmpty()) {
-                int cartItemId = itemList.get(0).getCartItemId();
-                boolean deleted = dao.deleteCartItem(cartItemId);
-                System.out.println("Delete item id " + cartItemId + " success? " + deleted);
-            }
-
-            // 5. Xoá tất cả theo cartId
-            boolean allDeleted = dao.deleteCartItemsByCartId(1);
-            System.out.println("Delete all items for cartId = 1? " + allDeleted);
+        // Lấy danh sách
+        List<CartItem> items = dao.getCartItemsByCartId(2);
+        for (CartItem i : items) {
+            System.out.println(i);
         }
 
+        // Cập nhật
+        if (!items.isEmpty()) {
+            CartItem first = items.get(0);
+            first.setQuantity(first.getQuantity() + 1);
+            first.setPrice(first.getPrice() + 20);
+            System.out.println("Update success? " + dao.updateCartItem(first));
+        }
+
+        // Xoá 1
+        if (!items.isEmpty()) {
+            int id = items.get(0).getCartItemId();
+            System.out.println("Delete item " + id + " success? " + dao.deleteCartItem(id));
+        }
+
+        // Xoá all
+        System.out.println("Delete all items for cart_id = 2? " + dao.deleteCartItemsByCartId(2));
+    }
 }

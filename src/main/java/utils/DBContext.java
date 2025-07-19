@@ -1,15 +1,26 @@
 package utils;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBContext {
+    /**
+     * Kết nối tới database MySQL
+     *
+     * @return Connection đối tượng kết nối
+     * @throws ClassNotFoundException nếu không tìm thấy driver MySQL
+     * @throws SQLException           nếu có lỗi khi kết nối tới database
+     */
     public Connection getConnection() throws ClassNotFoundException, SQLException {
-        String url = "jdbc:mysql://localhost:3306/OSS";
-        String user = "root";
-        String password = "12345678";
-
+        // Load environment variables from .env file
+        Dotenv dotenv = Dotenv.load();
+        String db_name = dotenv.get("DB_NAME");
+        String user = dotenv.get("MYSQL_USER");
+        String password = dotenv.get("MYSQL_PASSWORD");
+        String url = "jdbc:mysql://localhost:3306/" + db_name + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(url, user, password);
     }

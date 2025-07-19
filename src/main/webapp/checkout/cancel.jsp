@@ -1,17 +1,47 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thmeleaf.org">
+<html>
 <head>
+    <title>Thanh toán bị huỷ</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thanh toán thất bại</title>
-    <link rel="stylesheet" href="" th:href="@{/css/style.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0 0 10px #ccc;
+            text-align: center;
+        }
+        h2 {
+            color: #dc3545; /* Màu đỏ cảnh báo */
+        }
+        p {
+            margin: 20px 0;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-<div class="main-box">
-    <h4 class="payment-titlte">Thanh toán thất bại</h4>
-    <p>Nếu có bất kỳ câu hỏi nào, hãy gửi email tới <a href="mailto:support@payos.vn">support@payos.vn</a></p>
-    <a href="/create" id="return-page-btn">Trở về trang Tạo Link thanh toán</a>
+<div class="container">
+    <h2>⚠️ Đơn hàng chưa được thanh toán</h2>
+    <p>Giao dịch đã bị huỷ hoặc gặp lỗi.</p>
+    <a href="${pageContext.request.contextPath}/cart" class="btn">🔄 Thử lại thanh toán</a>
 </div>
-<script src="script.js"></script>
 </body>
 </html>
