@@ -6,6 +6,7 @@ import entites.Product;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import service.ProductService;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -16,10 +17,12 @@ import java.util.*;
 public class CartController extends HttpServlet {
 
     private ProductDAO productDAO;
+    private ProductService productService;
 
     @Override
     public void init() {
         productDAO = new ProductDAO();
+        productService  = new ProductService();
     }
 
     @Override
@@ -66,13 +69,16 @@ public class CartController extends HttpServlet {
         String action = request.getParameter("action");
         int productId = Integer.parseInt(request.getParameter("productId"));
         int quantity = Integer.parseInt(request.getParameter("quantity"));
-
+        Product product = productService.getProductById(productId);
         Map<Integer, Integer> cart = getCartFromCookie(request);
 
         if ("update".equals(action)) {
             if (quantity <= 0) {
                 cart.remove(productId);
             } else {
+                if(quantity>product.getStock()){
+                    quantity = product.getStock(); // Giới hạn số lượng không vượt quá tồn kho
+                }
                 cart.put(productId, quantity);
             }
             saveCartToCookie(response, cart);

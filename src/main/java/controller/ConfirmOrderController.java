@@ -3,6 +3,7 @@ package controller;
 import dao.ProductDAO;
 import entites.CartItem;
 import entites.Product;
+import entites.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -54,12 +55,14 @@ public class ConfirmOrderController extends HttpServlet {
 
         loadPageData(request);
         request.getRequestDispatcher("/WEB-INF/confirmOrder.jsp").forward(request, response);
-        request.getRequestDispatcher("confirmOrder.jsp").forward(request, response);
+
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session= request.getSession();
+        User user = (User) session.getAttribute("user");
 
         String wardCode = request.getParameter("ward");
         int districtStr = Integer.parseInt(request.getParameter("district"));
@@ -74,6 +77,7 @@ public class ConfirmOrderController extends HttpServlet {
 
         loadPageData(request);
         request.setAttribute("shippingFee", shippingFee);
+        request.setAttribute("user", user);
 
         request.getRequestDispatcher("/WEB-INF/confirmOrder.jsp").forward(request, response);
     }

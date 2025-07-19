@@ -12,7 +12,12 @@
 </head>
 <body>
 <%@ include file="header.jsp" %>
-
+<%
+    String addr = (String) session.getAttribute("ghn_address");
+    String selectedProvince = (String) session.getAttribute("ghn_province");
+    String selectedDistrict = (String) session.getAttribute("ghn_district");
+    String selectedWard = (String) session.getAttribute("ghn_ward");
+%>
 <div class="container my-5">
     <div class="row">
         <!-- Left Side: Cart + Customer Info -->
@@ -36,7 +41,7 @@
                     <strong><%= p.getProductName() %></strong><br>
                 </div>
                 <div> x<%= quantity %></div>
-                <div>$<%= String.format("%.2f", itemTotal) %></div>
+                <div> <%= String.format("%,d", (long) itemTotal) %>₫ </div>
             </div>
             <%  }
             } else { %>
@@ -48,30 +53,27 @@
 
             <hr class="my-4">
 
-            <h5>Customer Information</h5>
+            <h5>Shipping Customer Information</h5>
             <form action="${pageContext.request.contextPath}/checkout/create" method="post">
                 <div class="form-group">
-                    <input type="email" name="email" class="form-control" placeholder="Email" required>
+                    <input type="email" name="email" class="form-control" value="<%= (user != null) ? user.getEmail() : "" %>" placeholder="Email" required>
                 </div>
 
-                <h5>Shipping Address</h5>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <input type="text" name="firstName" class="form-control" placeholder="First Name" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <input type="text" name="lastName" class="form-control" placeholder="Last Name" required>
-                    </div>
+
+                <div class="form-group">
+                    <input type="text" name="name" value="<%= (user != null) ? user.getFullName() : "" %>" class="form-control" placeholder="Name" required>
+                </div>
+
+
+                <div class="form-group">
+                    <input type="tel" name="phone" value="<%= (user != null) ? user.getPhone() : "" %>" class="form-control" placeholder="Phone" required>
                 </div>
                 <div class="form-group">
-                    <input type="text" name="company" class="form-control" placeholder="Company (optional)">
+                <input type="text" name="address"
+                       value="<%= addr != null ? addr : "" %>"
+                       class="form-control" placeholder="Address" required>
                 </div>
-                <div class="form-group">
-                    <input type="tel" name="phone" class="form-control" placeholder="Phone" required>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="address" class="form-control" placeholder="Address" required>
-                </div>
+
                 <div class="form-row">
                     <div class="form-group col-md-4">
                         <select id="province" name="province" class="form-control" required>
@@ -92,7 +94,7 @@
 
                 <!-- Hidden shipping fee + total -->
                 <input type="hidden" id="shippingFeeInput" name="shippingFee" value="<%= shippingFee %>">
-                <input type="hidden" id="totalFeeInput" name="total" value="<%= String.format("%.2f", total) %>">
+                <input type="hidden" id="totalFeeInput" name="total" value=" <%= String.format("%,d", (long) total) %>₫">
 
                 <div class="text-right">
                     <button type="submit" class="btn btn-primary">Checkout</button>
@@ -106,14 +108,18 @@
                 <h5>Summary (<%= (cart != null) ? cart.size() : 0 %> items)</h5>
                 <hr>
                 <p class="d-flex justify-content-between">
-                    <span>Subtotal</span><span>$<%= String.format("%.2f", subtotal) %></span>
+                    <span>Subtotal</span><span><%= String.format("%,d", (long) subtotal) %>₫</span>
                 </p>
                 <p class="d-flex justify-content-between">
-                    <span>Shipping</span><span id="shipping-fee"><%= shippingFee > 0 ? "$" + shippingFee : "-" %></span>
+                    <span>Shipping</span>
+                    <span id="shipping-fee">
+                         <%= shippingFee > 0 ? String.format("%,d₫", (long) shippingFee) : "0₫" %>
+                    </span>
+
                 </p>
                 <hr>
                 <p class="d-flex justify-content-between font-weight-bold">
-                    <span>Total</span><span id="total-fee" data-subtotal="<%= subtotal %>">$<%= String.format("%.2f", total) %></span>
+                    <span>Total</span><span id="total-fee" data-subtotal="<%= String.format("%,d", (long) total) %>₫</span>
                 </p>
                 <p class="d-flex justify-content-between">
                     <span>Estimated Delivery</span><span>3–5 days</span>
@@ -130,7 +136,7 @@
                 </div>
                 <hr>
                 <p class="d-flex justify-content-between font-weight-bold">
-                    <span>Total</span><span>$<%= String.format("%.2f", total) %></span>
+                    <span>Total</span><span><%= String.format("%,d", (long) total) %>₫ %></span>
                 </p>
             </div>
         </div>
@@ -216,7 +222,8 @@
                 fetch(`confirmOrder?action=shippingFee&districtId=\${districtIdChecked}&wardCode=\${wardCodeChecked}`)
                     .then(res => res.json())
                     .then(data => {
-                        const shippingFee = data.total; // Giá trị trả về từ API
+                        const shippingFee = data.data.fee; // Giá trị trả về từ API
+                        console.log("Shipping fee:", shippingFee);
                         const subtotal = parseFloat(totalFeeSpan.dataset.subtotal);
                         const total = subtotal + shippingFee;
 

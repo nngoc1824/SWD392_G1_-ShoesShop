@@ -44,7 +44,7 @@ public class GHNProxy {
         json.put("from_district_id", 1454); // ✅ ID kho của bạn
         json.put("from_ward_code", "21211"); // ✅ Bắt buộc GHN
         json.put("service_id", 53320); // ✅ Lấy đúng ID dịch vụ GHN cung cấp
-        json.put("service_type_id", JSONObject.NULL); // Hoặc null
+        json.put("service_type_id", 2);
         json.put("to_district_id", toDistrictId);
 
         json.put("to_ward_code", toWardCode+"");
