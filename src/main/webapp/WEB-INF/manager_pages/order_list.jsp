@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,7 +33,7 @@
                     <h4 class="mb-0">Danh sách đơn hàng</h4>
                 </div>
             </div>
-            <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/manager/orders">
+            <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/orders">
                 <div class="col-auto">
                     <input type="text" class="form-control" name="search" placeholder="Order Code hoặc Địa chỉ"
                            value="${search}">
@@ -60,13 +61,27 @@
                     <c:forEach var="order" items="${orders}" varStatus="status">
                         <tr>
                             <td>${status.index + 1}</td>
-                            <td>${order.orderId}</td>
-                            <td>${order.orderCode}</td>
-                            <td>${order.orderDate}</td>
-                            <td>${order.totalPrice}</td>
+                            <td>${not empty order ? order.orderId : 'N/A'}</td>
+                            <td>${not empty order ? order.orderCode : 'N/A'}</td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${order.isDelivered}">
+                                    <c:when test="${not empty order and not empty order.orderDate}">
+                                        <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                    </c:when>
+                                    <c:otherwise>N/A</c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${not empty order}">
+                                        <fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true"/>₫
+                                    </c:when>
+                                    <c:otherwise>0₫</c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${not empty order and order.delivered}">
                                         <span class="badge bg-success">Đã giao</span>
                                     </c:when>
                                     <c:otherwise>
@@ -74,10 +89,12 @@
                                     </c:otherwise>
                                 </c:choose>
                             </td>
-                            <td>${order.shipAddress}</td>
-                            <td>${order.paymentStatus}</td>
+                            <td>${not empty order ? order.shipAddress : 'N/A'}</td>
+                            <td>${not empty order ? order.paymentStatus : 'N/A'}</td>
                             <td>
-                                <a href="${pageContext.request.contextPath}/manager/edit-order?orderId=${order.orderId}" class="btn btn-sm btn-info">Sửa</a>
+                                <c:if test="${not empty order}">
+                                    <a href="${pageContext.request.contextPath}/edit-order?orderId=${order.orderId}" class="btn btn-sm btn-info">Sửa</a>
+                                </c:if>
                             </td>
                         </tr>
                     </c:forEach>

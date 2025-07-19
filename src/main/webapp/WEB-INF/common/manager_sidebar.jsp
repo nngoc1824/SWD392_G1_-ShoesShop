@@ -100,6 +100,21 @@
                 </ul>
             </div>
         </li>
+
+        <li class="nav-small-cap">Orders</li>
+
+        <li class="sidebar-item">
+            <a class="sidebar-link" data-bs-toggle="collapse" data-bs-target="#orderMenu"
+               role="button" aria-expanded="false" aria-controls="orderMenu">
+                <span><i class="fa-solid fa-shopping-cart menu-icon"></i> Order Management</span>
+                <i class="fa fa-chevron-down small"></i>
+            </a>
+            <div class="collapse" id="orderMenu">
+                <ul class="list-unstyled ps-2">
+                    <li><a class="sidebar-link text-primary" href="orders">Order List</a></li>
+                </ul>
+            </div>
+        </li>
     </ul>
 </div>
 
