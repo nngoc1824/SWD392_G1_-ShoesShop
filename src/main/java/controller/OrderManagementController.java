@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@WebServlet(urlPatterns = {"/manager/orders", "/manager/edit-order"})
+@WebServlet(urlPatterns = {"/orders", "/edit-order"})
 public class OrderManagementController extends HttpServlet {
     
     private static final Logger log = LoggerFactory.getLogger(OrderManagementController.class);
@@ -40,11 +40,11 @@ public class OrderManagementController extends HttpServlet {
             OrderService orderService = new OrderService(conn);
             
             switch (path) {
-                case "/manager/orders":
+                case "/orders":
                     log.info("OrderManagementController - Handling order list request");
                     handleOrderList(request, response, orderService);
                     break;
-                case "/manager/edit-order":
+                case "/edit-order":
                     log.info("OrderManagementController - Handling edit order form request");
                     handleEditOrderForm(request, response, orderService);
                     break;
@@ -66,7 +66,7 @@ public class OrderManagementController extends HttpServlet {
         
         String path = request.getServletPath();
         
-        if ("/manager/edit-order".equals(path)) {
+        if ("/edit-order".equals(path)) {
             try (Connection conn = new DBContext().getConnection()) {
                 OrderService orderService = new OrderService(conn);
                 handleUpdateOrder(request, response, orderService);
@@ -126,7 +126,7 @@ public class OrderManagementController extends HttpServlet {
         
         String orderIdParam = request.getParameter("orderId");
         if (orderIdParam == null || orderIdParam.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/manager/orders");
+            response.sendRedirect(request.getContextPath() + "/orders");
             return;
         }
         
@@ -141,12 +141,12 @@ public class OrderManagementController extends HttpServlet {
                 request.getRequestDispatcher("/WEB-INF/manager_pages/edit_order.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "Không tìm thấy đơn hàng với ID: " + orderId);
-                response.sendRedirect(request.getContextPath() + "/manager/orders");
+                response.sendRedirect(request.getContextPath() + "/orders");
             }
             
         } catch (NumberFormatException e) {
             log.warn("Invalid order ID parameter: {}", orderIdParam);
-            response.sendRedirect(request.getContextPath() + "/manager/orders");
+            response.sendRedirect(request.getContextPath() + "/orders");
         }
     }
 
@@ -166,7 +166,7 @@ public class OrderManagementController extends HttpServlet {
             Optional<Order> existingOrderOpt = orderService.findById(orderId);
             if (!existingOrderOpt.isPresent()) {
                 request.setAttribute("error", "Không tìm thấy đơn hàng với ID: " + orderId);
-                response.sendRedirect(request.getContextPath() + "/manager/orders");
+                response.sendRedirect(request.getContextPath() + "/orders");
                 return;
             }
             

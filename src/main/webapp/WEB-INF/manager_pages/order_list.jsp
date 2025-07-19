@@ -33,7 +33,7 @@
                     <h4 class="mb-0">Danh sách đơn hàng</h4>
                 </div>
             </div>
-            <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/manager/orders">
+            <form class="row g-2 mb-3" method="get" action="${pageContext.request.contextPath}/orders">
                 <div class="col-auto">
                     <input type="text" class="form-control" name="search" placeholder="Order Code hoặc Địa chỉ"
                            value="${search}">
@@ -93,7 +93,7 @@
                             <td>${not empty order ? order.paymentStatus : 'N/A'}</td>
                             <td>
                                 <c:if test="${not empty order}">
-                                    <a href="${pageContext.request.contextPath}/manager/edit-order?orderId=${order.orderId}" class="btn btn-sm btn-info">Sửa</a>
+                                    <a href="${pageContext.request.contextPath}/edit-order?orderId=${order.orderId}" class="btn btn-sm btn-info">Sửa</a>
                                 </c:if>
                             </td>
                         </tr>

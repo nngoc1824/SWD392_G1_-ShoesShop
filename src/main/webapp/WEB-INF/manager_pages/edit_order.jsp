@@ -82,7 +82,7 @@
             </div>
 
             <!-- Editable Order Details Form -->
-            <form method="post" action="${pageContext.request.contextPath}/manager/edit-order" id="editOrderForm">
+            <form method="post" action="${pageContext.request.contextPath}/edit-order" id="editOrderForm">
                 <input type="hidden" name="orderId" value="${not empty order ? order.orderId : ''}"/>
 
                 <!-- Payment Information Section -->
@@ -149,7 +149,7 @@
 
                 <!-- Action Buttons -->
                 <div class="d-flex justify-content-between">
-                    <a href="${pageContext.request.contextPath}/manager/orders" class="btn btn-secondary">
+                    <a href="${pageContext.request.contextPath}/orders" class="btn btn-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
                     </a>
                     <button type="submit" class="btn btn-success" id="submitBtn">
