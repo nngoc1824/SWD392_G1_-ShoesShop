@@ -113,6 +113,84 @@ public class OrderDAO {
         }
     }
 
+    // ✅ Lấy tất cả đơn hàng (for order management)
+    public List<Order> getAllOrders() throws SQLException {
+        String sql = "SELECT * FROM `Order` ORDER BY order_date DESC";
+        List<Order> orders = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                orders.add(mapRow(rs));
+            }
+        }
+        return orders;
+    }
+
+    // ✅ Lấy đơn hàng với phân trang và tìm kiếm
+    public List<Order> getAllOrdersWithPagination(int page, int pageSize, String searchQuery) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT * FROM `Order` WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            sql.append(" AND (CAST(order_id AS CHAR) LIKE ? OR ship_address LIKE ?)");
+            params.add("%" + searchQuery + "%");
+            params.add("%" + searchQuery + "%");
+        }
+
+        sql.append(" ORDER BY order_date DESC LIMIT ?, ?");
+        params.add((page - 1) * pageSize);
+        params.add(pageSize);
+
+        List<Order> orders = new ArrayList<>();
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                orders.add(mapRow(rs));
+            }
+        }
+        return orders;
+    }
+
+    // ✅ Đếm tổng số đơn hàng (for pagination)
+    public int getTotalOrderCount(String searchQuery) throws SQLException {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM `Order` WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            sql.append(" AND (CAST(order_id AS CHAR) LIKE ? OR ship_address LIKE ?)");
+            params.add("%" + searchQuery + "%");
+            params.add("%" + searchQuery + "%");
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    // ✅ Cập nhật đơn hàng hoàn chỉnh
+    public boolean updateOrder(Order order) throws SQLException {
+        String sql = "UPDATE `Order` SET total_price = ?, status = ?, ship_address = ?, payment_status = ?, phone = ? WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDouble(1, order.getTotalPrice());
+            stmt.setBoolean(2, order.isStatus());
+            stmt.setString(3, order.getShipAddress());
+            stmt.setString(4, order.getPaymentStatus());
+            stmt.setString(5, order.getPhone());
+            stmt.setInt(6, order.getOrderId());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
     // Ánh xạ từ ResultSet sang đối tượng Order
     private Order mapRow(ResultSet rs) throws SQLException {
         return Order.builder()
@@ -125,6 +203,40 @@ public class OrderDAO {
                 .phone(rs.getString("phone")) // thêm phone
                 .userId(rs.getInt("user_id"))
                 .build();
+    }
+
+    // Test method
+    public static void main(String[] args) {
+        try {
+            utils.DBContext dbContext = new utils.DBContext();
+            Connection conn = dbContext.getConnection();
+            OrderDAO orderDAO = new OrderDAO(conn);
+
+            System.out.println("Testing OrderDAO methods...");
+
+            // Test getAllOrders
+            List<Order> allOrders = orderDAO.getAllOrders();
+            System.out.println("Total orders: " + allOrders.size());
+
+            // Test pagination
+            List<Order> paginatedOrders = orderDAO.getAllOrdersWithPagination(1, 5, "");
+            System.out.println("Paginated orders (page 1, size 5): " + paginatedOrders.size());
+
+            // Test count
+            int totalCount = orderDAO.getTotalOrderCount("");
+            System.out.println("Total order count: " + totalCount);
+
+            // Test search
+            int searchCount = orderDAO.getTotalOrderCount("test");
+            System.out.println("Search count for 'test': " + searchCount);
+
+            conn.close();
+            System.out.println("OrderDAO test completed successfully!");
+
+        } catch (Exception e) {
+            System.err.println("Error testing OrderDAO: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 }
