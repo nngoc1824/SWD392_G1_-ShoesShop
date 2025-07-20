@@ -23,11 +23,7 @@ public class OrderDAO {
             stmt.setString(5, order.getShipAddress());
             stmt.setString(6, order.getPaymentStatus());
             stmt.setString(7, order.getPhone());
-            if (order.getUserId() != 0) {
-                stmt.setInt(8, order.getUserId());
-            } else {
-                stmt.setNull(8, java.sql.Types.INTEGER);
-            }
+            stmt.setInt(8, order.getUserId());
 
             int rows = stmt.executeUpdate();
             if (rows > 0) return order.getOrderId();

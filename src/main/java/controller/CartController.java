@@ -92,7 +92,7 @@ public class CartController extends HttpServlet {
         } else if ("buyNow".equals(action)) {
             cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
             saveCartToCookie(response, cart);
-            response.sendRedirect("checkout"); // Điều hướng sang trang thanh toán
+            response.sendRedirect("checkout/create"); // Điều hướng sang trang thanh toán
         } else {
             // Mặc định: chỉ thêm nếu không có action
             cart.put(productId, cart.getOrDefault(productId, 0) + quantity);

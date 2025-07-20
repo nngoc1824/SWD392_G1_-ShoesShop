@@ -19,12 +19,16 @@ import vn.payos.type.Webhook;
 import vn.payos.type.WebhookData;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
-@WebServlet(urlPatterns = {"/checkout/create", "/checkout/confirm-webhook"})
+@WebServlet(urlPatterns = {"/checkout/create", "/checkout/confirm-webhook", "/checkout/confirm"})
 public class CheckoutServlet extends HttpServlet {
     private final PayOS payOS = PayOSInitializer.getInstance();
     private final ObjectMapper mapper = new ObjectMapper();
@@ -36,6 +40,63 @@ public class CheckoutServlet extends HttpServlet {
             case "/checkout/create" -> handleCreatePayment(req, resp);
             case "/checkout/confirm-webhook" -> handleWebhook(req, resp);
             default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            String orderCode = req.getParameter("orderCode");
+            if (orderCode == null) {
+                resp.sendRedirect("/checkout/error.jsp");
+                return;
+            }
+
+            List<CartItem> cartItems = getCartItemsFromPendingCartCookie(req);
+            String phone = getCookieValue(req, "pendingPhone");
+            String address = getCookieValue(req, "pendingAddress");
+
+            if (cartItems.isEmpty() || phone == null || address == null) {
+                resp.sendRedirect("/checkout/error.jsp");
+                return;
+            }
+            long orderIdLong = Long.parseLong(orderCode); // AN TOÀN với số lớn
+
+            double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+
+
+            System.out.println(getUserIdFromSessionOrRequest(req));
+
+            Order order = Order.builder()
+                    .orderId((int) orderIdLong)
+                    .phone(URLDecoder.decode(phone, "UTF-8"))
+                    .shipAddress(URLDecoder.decode(address, "UTF-8"))
+                    .totalPrice(total)
+                    .paymentStatus("Paid")
+                    .status(true)
+                    .orderDate(new Date())
+                    .userId(getUserIdFromSessionOrRequest(req))
+                    .build();
+
+            try (Connection conn = new DBContext().getConnection()) {
+                new OrderService(conn).save(order);
+                OrderItemService orderItemService = new OrderItemService(conn);
+                for (CartItem item : cartItems) {
+                    orderItemService.save(OrderItem.builder()
+                            .orderId((int) orderIdLong)
+                            .productId(item.getProductId())
+                            .quantity(item.getQuantity())
+                            .price(item.getPrice())
+                            .build());
+                }
+            }
+
+            System.out.println("✅ Order & Items đã lưu (returnUrl)");
+
+            req.getRequestDispatcher("/checkout/success.jsp").forward(req, resp);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect("/checkout/error.jsp");
         }
     }
 
@@ -52,6 +113,7 @@ public class CheckoutServlet extends HttpServlet {
             String lastName = req.getParameter("lastName");
             String phone = req.getParameter("phone");
             double shippingFee = Double.parseDouble(req.getParameter("shippingFee"));
+
             double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum() + shippingFee;
 
             String address = req.getParameter("address");
@@ -61,9 +123,27 @@ public class CheckoutServlet extends HttpServlet {
             String fullAddress = address + ", " + ward + ", " + district + ", " + province;
 
             long orderCode = generateOrderCode();
+            String description = "Đơn hàng " + orderCode;
 
-            String description = "Don hang " + orderCode;
+            // 👉 Lưu cartItems vào cookie (Base64)
+            String cartJson = mapper.writeValueAsString(cartItems);
+            String encodedCart = Base64.getEncoder().encodeToString(cartJson.getBytes());
+            Cookie cartCookie = new Cookie("pendingCart", encodedCart);
+            cartCookie.setPath("/");
+            cartCookie.setMaxAge(10 * 60);
+            resp.addCookie(cartCookie);
 
+            // 👉 Lưu shipping info vào cookie
+            Cookie phoneCookie = new Cookie("pendingPhone", URLEncoder.encode(phone, "UTF-8"));
+            Cookie addressCookie = new Cookie("pendingAddress", URLEncoder.encode(fullAddress, "UTF-8"));
+            phoneCookie.setPath("/");
+            addressCookie.setPath("/");
+            phoneCookie.setMaxAge(10 * 60);
+            addressCookie.setMaxAge(10 * 60);
+            resp.addCookie(phoneCookie);
+            resp.addCookie(addressCookie);
+
+            // 👉 Tạo payment link
             ItemData item = ItemData.builder()
                     .name(description)
                     .quantity(1)
@@ -74,24 +154,10 @@ public class CheckoutServlet extends HttpServlet {
                     .orderCode(orderCode)
                     .amount((int) total)
                     .description(description)
-                    .returnUrl(getBaseUrl(req) + "/checkout/success.jsp")
+                    .returnUrl(getBaseUrl(req) + "/checkout/confirm")
                     .cancelUrl(getBaseUrl(req) + "/checkout/cancel.jsp")
                     .item(item)
                     .build();
-
-            Order pendingOrder = Order.builder()
-                    .orderId((int) orderCode) // Gán ID từ orderCode đã sinh!
-                    .shipAddress(fullAddress)
-                    .totalPrice(total)
-                    .status(false)
-                    .paymentStatus("Pending")
-                    .orderDate(new Date())
-                    .phone(phone) // Đừng quên nhận phone từ form!
-                    .userId(getUserIdFromSessionOrRequest(req)) // nếu có userId
-                    .build();
-
-
-            req.getSession().setAttribute("pendingOrder", pendingOrder);
 
             CheckoutResponseData checkoutData = payOS.createPaymentLink(paymentData);
 
@@ -113,37 +179,43 @@ public class CheckoutServlet extends HttpServlet {
 
             long orderCode = data.getOrderCode();
 
-            HttpSession session = req.getSession();
-            Order pendingOrder = (Order) session.getAttribute("pendingOrder");
+            List<CartItem> cartItems = getCartItemsFromPendingCartCookie(req);
+            String phone = getCookieValue(req, "pendingPhone");
+            String address = getCookieValue(req, "pendingAddress");
 
-            if (pendingOrder != null && pendingOrder.getOrderId() == orderCode) {
-                pendingOrder.setStatus(true);
-                pendingOrder.setPaymentStatus("Paid");
-                pendingOrder.setOrderDate(new Date());
-
-                try (Connection conn = new DBContext().getConnection()) {
-                    OrderService service = new OrderService(conn);
-                    service.save(pendingOrder);
-                }
-                try (Connection conn = new DBContext().getConnection()) {
-                    OrderItemService orderItemService = new  OrderItemService(conn);
-                    List<CartItem> cartItems = (List<CartItem>) session.getAttribute("cartItems");
-                    for (CartItem cartItem : cartItems) {
-                        OrderItem orderItem = OrderItem.builder()
-                                .orderId((int) orderCode)
-                                .productId(cartItem.getProductId())
-                                .quantity(cartItem.getQuantity())
-                                .price(cartItem.getPrice())
-                                .build();
-                        orderItemService.save(orderItem);
-                    }
-                }
-
-                session.removeAttribute("pendingOrder");
-                System.out.println("✅ Đơn hàng đã lưu vào DB.");
-            } else {
-                System.out.println("⚠️ Không tìm thấy đơn hàng khớp trong session.");
+            if (cartItems.isEmpty() || phone == null || address == null) {
+                System.out.println("❌ Thiếu dữ liệu giỏ hàng hoặc địa chỉ!");
+                resp.sendError(400, "Missing cart or shipping info");
+                return;
             }
+
+            double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+
+            Order order = Order.builder()
+                    .orderId((int) orderCode)
+                    .phone(URLDecoder.decode(phone, "UTF-8"))
+                    .shipAddress(URLDecoder.decode(address, "UTF-8"))
+                    .totalPrice(total)
+                    .paymentStatus("Paid")
+                    .status(true)
+                    .orderDate(new Date())
+                    .userId(getUserIdFromSession(req))
+                    .build();
+
+            try (Connection conn = new DBContext().getConnection()) {
+                new OrderService(conn).save(order);
+                OrderItemService orderItemService = new OrderItemService(conn);
+                for (CartItem item : cartItems) {
+                    orderItemService.save(OrderItem.builder()
+                            .orderId((int) orderCode)
+                            .productId(item.getProductId())
+                            .quantity(item.getQuantity())
+                            .price(item.getPrice())
+                            .build());
+                }
+            }
+
+            System.out.println("✅ Order & Items đã lưu (webhook)");
 
             ObjectNode responseJson = mapper.createObjectNode();
             responseJson.put("error", 0);
@@ -228,4 +300,45 @@ public class CheckoutServlet extends HttpServlet {
         // Chưa login ➜ trả về 0
         return 0;
     }
+
+    private List<CartItem> getCartItemsFromPendingCartCookie(HttpServletRequest req) {
+        List<CartItem> cartItems = new ArrayList<>();
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("pendingCart".equals(cookie.getName())) {
+                    try {
+                        String decoded = new String(Base64.getDecoder().decode(cookie.getValue()));
+                        CartItem[] items = mapper.readValue(decoded, CartItem[].class);
+                        cartItems = List.of(items);
+                    } catch (Exception ignore) {}
+                }
+            }
+        }
+        return cartItems;
+    }
+
+    private String getCookieValue(HttpServletRequest req, String name) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    private int getUserIdFromSession(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("user") != null) {
+            User user = (User) session.getAttribute("user");
+            Integer userId = user.getUserId();
+            return userId != null ? userId : 0; // fallback an toàn
+        }
+        return 0;
+    }
+
+
 }
