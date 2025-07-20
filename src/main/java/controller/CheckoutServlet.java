@@ -51,8 +51,8 @@ public class CheckoutServlet extends HttpServlet {
             String firstName = req.getParameter("firstName");
             String lastName = req.getParameter("lastName");
             String phone = req.getParameter("phone");
-
-            double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum();
+            double shippingFee = Double.parseDouble(req.getParameter("shippingFee"));
+            double total = cartItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum() + shippingFee;
 
             String address = req.getParameter("address");
             String province = req.getParameter("province");
