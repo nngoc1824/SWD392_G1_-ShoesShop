@@ -119,7 +119,7 @@
                 </p>
                 <hr>
                 <p class="d-flex justify-content-between font-weight-bold">
-                    <span>Total</span><span id="total-fee" data-subtotal="<%= String.format("%,d", (long) total) %>₫</span>
+                    <span>Total</span><span id="total-fee" data-subtotal="<%= String.format("%d", (long) total) %>"> ₫ </span>
                 </p>
                 <p class="d-flex justify-content-between">
                     <span>Estimated Delivery</span><span>3–5 days</span>
@@ -136,7 +136,7 @@
                 </div>
                 <hr>
                 <p class="d-flex justify-content-between font-weight-bold">
-                    <span>Total</span><span><%= String.format("%,d", (long) total) %>₫ %></span>
+                    <span >Total</span><span class="final-total"><%= String.format("%,d", (long) total) %>₫ </span>
                 </p>
             </div>
         </div>
@@ -153,7 +153,7 @@
         const totalFeeInput = document.getElementById("totalFeeInput");
         const shippingFeeSpan = document.getElementById("shipping-fee");
         const totalFeeSpan = document.getElementById("total-fee");
-
+        const finalTotal = document.querySelector(".final-total");
         // Load Provinces
         fetch("confirmOrder?action=province")
             .then(res => res.json())
@@ -222,18 +222,32 @@
                 fetch(`confirmOrder?action=shippingFee&districtId=\${districtIdChecked}&wardCode=\${wardCodeChecked}`)
                     .then(res => res.json())
                     .then(data => {
-                        const shippingFee = data.data.fee; // Giá trị trả về từ API
+                        const shippingFee = data.fee; // Giá trị trả về từ API
                         console.log("Shipping fee:", shippingFee);
                         const subtotal = parseFloat(totalFeeSpan.dataset.subtotal);
                         const total = subtotal + shippingFee;
-
+                        console.log(totalFeeSpan)
+                        console.log("Total after shipping fee:", subtotal);
                         // Cập nhật UI
-                        shippingFeeSpan.textContent = `\${shippingFee}`;
-                        totalFeeSpan.textContent = `\${total.toFixed(2)}`;
 
                         // Cập nhật input ẩn
                         shippingFeeInput.value = shippingFee;
                         totalFeeInput.value = total.toFixed(2);
+                        //format tien
+                        const formattedShippingFee = new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(shippingFee);
+                        shippingFeeSpan.textContent = formattedShippingFee;
+                        // Cập nhật tổng tiền
+                        const formattedTotal = new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(total);
+                        totalFeeSpan.textContent = formattedTotal;
+                        // Cập nhật tổng tiền ở phần cuối
+                        finalTotal.textContent = formattedTotal;
+
                     })
                     .catch(err => console.error("Shipping fee fetch error:", err));
             }

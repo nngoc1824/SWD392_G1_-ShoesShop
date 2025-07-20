@@ -14,9 +14,8 @@ import java.net.URL;
 
 public class GHNProxy {
 
-    private static final String TOKEN = "796859fa-5fca-11f0-9b80-96385126568f";
-    private static final String SHOP_ID = "5888673";
-    private static final int FROM_DISTRICT_ID = 1451;
+    private static final String TOKEN = "747b6fe6-6571-11f0-8fe4-de0427be42b0";
+    private static final String SHOP_ID = "5901610";
 
     private static final String GHN_PROVINCE_API = "https://online-gateway.ghn.vn/shiip/public-api/master-data/province";
     private static final String GHN_DISTRICT_API = "https://online-gateway.ghn.vn/shiip/public-api/master-data/district";
@@ -41,13 +40,10 @@ public class GHNProxy {
     public int calculateShippingFee(int toDistrictId, String toWardCode) throws Exception {
         log.info("Calculating shipping fee to district ID: {}, ward code: {}", toDistrictId, toWardCode);
         JSONObject json = new JSONObject();
-        json.put("from_district_id", 1454); // ✅ ID kho của bạn
-        json.put("from_ward_code", "21211"); // ✅ Bắt buộc GHN
-        json.put("service_id", 53320); // ✅ Lấy đúng ID dịch vụ GHN cung cấp
         json.put("service_type_id", 2);
         json.put("to_district_id", toDistrictId);
 
-        json.put("to_ward_code", toWardCode+"");
+        json.put("to_ward_code", toWardCode);
         json.put("height", 50);
         json.put("length", 20);
         json.put("weight", 200);
